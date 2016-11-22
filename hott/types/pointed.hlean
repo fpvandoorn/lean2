@@ -948,7 +948,7 @@ namespace pointed
 
   variable {A}
 
-  theorem loopn_succ_in_con {n : ℕ} (p q : Ω[succ (succ n)] A) :
+  definition loopn_succ_in_con {n : ℕ} (p q : Ω[succ (succ n)] A) :
     loopn_succ_in A (succ n) (p ⬝ q) =
     loopn_succ_in A (succ n) p ⬝ loopn_succ_in A (succ n) q :=
   !loop_pequiv_loop_con
@@ -1018,7 +1018,7 @@ namespace pointed
   phomotopy.mk (λa, respect_pt f) (idp_con _)⁻¹
 
   definition pconst_pcompose [constructor] (f : A →* B) : pconst B C ∘* f ~* pconst A C :=
-  phomotopy.mk (λa, rfl) (ap_constant _ _)⁻¹
+  phomotopy.mk (λa, rfl) (ap_constant _ _)⁻
 
   definition ppcompose_right [constructor] (f : A →* B) : ppmap B C →* ppmap A C :=
   begin
