@@ -33,7 +33,7 @@ namespace pointed
     -- this is in a separate namespace because it caused type class inference to loop in some places
     definition is_trunc_pointed_MK [instance] [priority 1100] (n : ℕ₋₂) {A : Type} (a : A)
       [H : is_trunc n A] : is_trunc n (pointed.MK A a) :=
-    H
+    _
   end ops
 
   definition is_trunc_loop [instance] [priority 1100] (A : Type*)
@@ -76,9 +76,6 @@ namespace pointed
     { intro x, induction x with X x, reflexivity},
     { intro x, induction x with X x, reflexivity},
   end
-
-  definition pType.eta_expand [constructor] (A : Type*) : Type* :=
-  pointed.MK A pt
 
   definition add_point [constructor] (A : Type) : Type* :=
   pointed.Mk (none : option A)
@@ -128,7 +125,7 @@ namespace pointed
 
   definition passoc (h : C →* D) (g : B →* C) (f : A →* B) : (h ∘* g) ∘* f ~* h ∘* (g ∘* f) :=
   begin
-    fconstructor, intro a, reflexivity,
+    fapply phomotopy.mk, intro a, reflexivity,
     cases A, cases B, cases C, cases D, cases f with f pf, cases g with g pg, cases h with h ph,
     esimp at *,
     induction pf, induction pg, induction ph, reflexivity
@@ -136,14 +133,14 @@ namespace pointed
 
   definition pid_pcompose [constructor] (f : A →* B) : pid B ∘* f ~* f :=
   begin
-    fconstructor,
+    fapply phomotopy.mk,
     { intro a, reflexivity},
     { reflexivity}
   end
 
   definition pcompose_pid [constructor] (f : A →* B) : f ∘* pid A ~* f :=
   begin
-    fconstructor,
+    fapply phomotopy.mk,
     { intro a, reflexivity},
     { reflexivity}
   end
@@ -160,7 +157,7 @@ namespace pointed
   end
 
   definition pmap.eta_expand [constructor] {A B : Type*} (f : A →* B) : A →* B :=
-  pmap.mk f (pmap.resp_pt f)
+  pmap.mk f (respect_pt f)
 
   definition pmap_eq (r : Πa, f a = g a) (s : respect_pt f = (r pt) ⬝ respect_pt g) : f = g :=
   begin
@@ -179,7 +176,7 @@ namespace pointed
   begin
     fapply equiv.MK,
     { intro f a, cases f with f p, exact f (some a)},
-    { intro f, fconstructor,
+    { intro f, fapply pmap.mk,
         intro a, cases a, exact pt, exact f a,
         reflexivity},
     { intro f, reflexivity},
@@ -233,7 +230,7 @@ namespace pointed
 
   definition ap1 [constructor] (f : A →* B) : Ω A →* Ω B :=
   begin
-    fconstructor,
+    fapply pmap.mk,
     { intro p, exact !respect_pt⁻¹ ⬝ ap f p ⬝ !respect_pt},
     { esimp, apply con.left_inv}
   end
@@ -285,7 +282,7 @@ namespace pointed
   theorem apn_con (n : ℕ) (f : A →* B) (p q : Ω[n+1] A)
     : apn (n+1) f (p ⬝ q) = apn (n+1) f p ⬝ apn (n+1) f q :=
   by rewrite [+apn_succ, ap1_con]
-
+--,
   theorem apn_inv (n : ℕ)  (f : A →* B) (p : Ω[n+1] A) : apn (n+1) f p⁻¹ = (apn (n+1) f p)⁻¹ :=
   by rewrite [+apn_succ, ap1_inv]
 

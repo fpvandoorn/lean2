@@ -27,12 +27,14 @@ namespace pointed
   definition pt [reducible] [unfold 2] [H : pointed A] := point A
   definition Point [reducible] [unfold 1] (A : Type*) := pType.Point A
   definition carrier [reducible] [unfold 1] (A : Type*) := pType.carrier A
-  protected definition Mk [constructor] {A : Type} (a : A) := pType.mk A a
-  protected definition MK [constructor] (A : Type) (a : A) := pType.mk A a
-  protected definition mk' [constructor] (A : Type) [H : pointed A] : Type* :=
+  protected definition Mk [constructor] [reducible] {A : Type} (a : A) := pType.mk A a
+  protected definition MK [constructor] [reducible] (A : Type) (a : A) := pType.mk A a
+  protected definition mk' [constructor] [reducible] (A : Type) [H : pointed A] : Type* :=
   pType.mk A (point A)
   definition pointed_carrier [instance] [constructor] (A : Type*) : pointed A :=
   pointed.mk (Point A)
+
+  definition eta_expand [unfold 1] [reducible] (A : Type*) : Type* := pType.mk A pt
 
 end pointed
 open pointed
@@ -89,21 +91,30 @@ structure ppi (A : Type*) (P : A → Type*) :=
   (resp_pt : to_fun (Point A) = Point (P (Point A)))
 
 -- definition pmap (A B : Type*) := @ppi A (λa, B)
-structure pmap (A B : Type*) :=
+structure pmap' (A B : Type*) :=
   (to_fun : A → B)
   (resp_pt : to_fun (Point A) = Point B)
 
+definition pmap (A B : Type*) := pmap' (eta_expand A) (eta_expand B)
+
 namespace pointed
-  abbreviation respect_pt [unfold 3] := @pmap.resp_pt
+  variables {A B : Type*}
   notation `map₊` := pmap
   infix ` →* `:30 := pmap
-  attribute pmap.to_fun ppi.to_fun [coercion]
+  attribute ppi.to_fun [coercion]
   notation `Π*` binders `, ` r:(scoped P, ppi _ P) := r
+
+  definition pmap.to_fun [coercion] [unfold 3] [reducible] (f : A →* B) : A → B := pmap'.to_fun f
+  definition respect_pt [unfold 3] [reducible] (f : A →* B) : f (Point A) = Point B :=
+  pmap'.resp_pt f
+
   -- definition pmap.mk [constructor] {A B : Type*} (f : A → B) (p : f pt = pt) : A →* B :=
   -- ppi.mk f p
   -- definition pmap.to_fun [coercion] [unfold 3] {A B : Type*} (f : A →* B) : A → B := f
 
 end pointed open pointed
+
+definition pmap.mk {A B : Type*} (f : A → B) (p : f pt = pt) : A →* B := pmap'.mk f p
 
 /- pointed homotopies -/
 structure phomotopy {A B : Type*} (f g : A →* B) :=
@@ -119,12 +130,19 @@ namespace pointed
   phomotopy.homotopy p
 
   /- pointed equivalences -/
-  structure pequiv (A B : Type*) extends equiv A B, pmap A B
+  structure pequiv' (A B : Type*) extends equiv A B, pmap' A B
+  definition pequiv (A B : Type*) := pequiv' (eta_expand A) (eta_expand B)
 
-  attribute pequiv._trans_of_to_pmap pequiv._trans_of_to_equiv pequiv.to_pmap pequiv.to_equiv
-            [unfold 3]
-  attribute pequiv.to_is_equiv [instance]
-  attribute pequiv.to_pmap [coercion]
   infix ` ≃* `:25 := pequiv
+  definition pequiv.to_pmap [unfold 3] [coercion] {A B : Type*} (f : A ≃* B) : A →* B :=
+  pequiv'.to_pmap' f
+
+
+  attribute pequiv'._trans_of_to_equiv pequiv'.to_pmap' pequiv'.to_equiv
+            pequiv.to_pmap pequiv._trans_of_to_pmap [unfold 3]
+  attribute pequiv'.to_is_equiv [instance]
+
+  definition is_equiv_pequiv [instance] {A B : Type*} (f : A ≃* B) : is_equiv f :=
+  pequiv'.to_is_equiv f
 
 end pointed
