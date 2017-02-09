@@ -12,16 +12,10 @@ import .pointed .nat .pi
 
 open eq lift nat is_trunc pi pointed sum function prod option sigma algebra
 
-inductive list (T : Type) : Type :=
-| nil {} : list T
-| cons   : T → list T → list T
-
 definition pointed_list [instance] (A : Type) : pointed (list A) :=
 pointed.mk list.nil
 
 namespace list
-notation h :: t  := cons h t
-notation `[` l:(foldr `, ` (h t, cons h t) nil `]`) := l
 
 universe variable u
 variable {T : Type.{u}}
@@ -746,9 +740,6 @@ namespace list
 
 variables {A B C : Type}
 /- map -/
-definition map (f : A → B) : list A → list B
-| []       := []
-| (a :: l) := f a :: map l
 
 theorem map_nil (f : A → B) : map f [] = [] := idp
 
@@ -870,18 +861,11 @@ theorem filter_append {p : A → Type} [h : decidable_pred p] : Π (l₁ l₂ : 
   (suppose ¬ p a, by rewrite [append_cons, *filter_cons_of_neg _ this, filter_append])
 -/
 
-/- foldl & foldr -/
-definition foldl (f : A → B → A) : A → list B → A
-| a []       := a
-| a (b :: l) := foldl (f a b) l
+/- foldl & foldr (they are defined in init.types) -/
 
 theorem foldl_nil (f : A → B → A) (a : A) : foldl f a [] = a := idp
 
 theorem foldl_cons (f : A → B → A) (a : A) (b : B) (l : list B) : foldl f a (b::l) = foldl f (f a b) l := idp
-
-definition foldr (f : A → B → B) : B → list A → B
-| b []       := b
-| b (a :: l) := f a (foldr b l)
 
 theorem foldr_nil (f : A → B → B) (b : B) : foldr f b [] = b := idp
 

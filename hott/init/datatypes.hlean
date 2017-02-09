@@ -96,6 +96,10 @@ inductive option (A : Type) : Type :=
 | none {} : option A
 | some    : A → option A
 
+inductive list (T : Type) : Type :=
+| nil {} : list T
+| cons   : T → list T → list T
+
 -- Remark: we manually generate the nat.rec_on, nat.induction_on, nat.cases_on and nat.no_confusion.
 -- We do that because we want 0 instead of nat.zero in these eliminators.
 set_option inductive.rec_on   false

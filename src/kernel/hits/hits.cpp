@@ -7,6 +7,7 @@ Author: Leonardo de Moura
 Builtin HITs:
     - n-truncation
     - type quotients (non-truncated quotients)
+    - an experimental recursive HIT
 */
 #include "util/sstream.h"
 #include "kernel/kernel_exception.h"

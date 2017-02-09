@@ -10,7 +10,7 @@ prelude
 
 import .trunc .pathover
 
-open is_trunc eq
+open is_trunc eq list
 
 /-
   We take two higher inductive types (hits) as primitive notions in Lean. We define all other hits
@@ -65,6 +65,27 @@ namespace quotient
 
 end quotient
 
+constant recursive_hit_family.{u v w} {A : Type.{u}} {R : list A → A → Type.{v}}
+  (Q : Π⦃l l' : list A⦄ ⦃a : A⦄, R l a → R l' a → Type.{w}) : A → Type.{max u v w}
+
+namespace recursive_hit_family
+
+  constant incl {A : Type} {R : list A → A → Type} (Q : Π⦃l l' : list A⦄ ⦃a : A⦄, R l a → R l' a → Type) {l : list A} {a : A}
+    (p : R l a) (x : prods (recursive_hit_family Q) l) : recursive_hit_family Q a
+
+  constant pth {A : Type} {R : list A → A → Type} {Q : Π⦃l l' : list A⦄ ⦃a : A⦄, R l a → R l' a → Type} {l l' : list A} {a : A}
+    {p : R l a} {p' : R l' a} (q : Q p p') (x : prods (recursive_hit_family Q) l) (x' : prods (recursive_hit_family Q) l')
+    : incl Q p x = incl Q p' x'
+
+  protected constant rec {A : Type} {R : list A → A → Type} {Q : Π⦃l l' : list A⦄ ⦃a : A⦄, R l a → R l' a → Type}
+    {P : Π⦃a⦄, recursive_hit_family Q a → Type}
+    (P0 : Π⦃l : list A⦄ ⦃a : A⦄ (p : R l a) (x : prods (recursive_hit_family Q) l) (ps : dprods P l x), P (incl Q p x))
+    (P1 : Π⦃l l' : list A⦄ ⦃a : A⦄ {p : R l a} {p' : R l' a} (q : Q p p') (x : prods (recursive_hit_family Q) l)
+      (x' : prods (recursive_hit_family Q) l') (ps : dprods P l x) (ps' : dprods P l' x'), P0 p x ps =[pth q x x'] P0 p' x' ps')
+    {a : A} (x : recursive_hit_family Q a) : P x
+
+end recursive_hit_family
+
 init_hits -- Initialize builtin computational rules for trunc and quotient
 
 namespace trunc
@@ -84,5 +105,5 @@ namespace quotient
     {a a' : A} (H : R a a') : apd (quotient.rec Pc Pp) (eq_of_rel R H) = Pp H
 end quotient
 
-attribute quotient.class_of trunc.tr [constructor]
+attribute quotient.class_of trunc.tr recursive_hit_family.incl [constructor]
 attribute quotient.rec_on trunc.rec_on [unfold 4]

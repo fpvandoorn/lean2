@@ -94,3 +94,30 @@ namespace prod
   definition flip [unfold 3] {A B : Type} (a : A × B) : B × A := pair (pr2 a) (pr1 a)
 
 end prod
+
+-- List type
+
+namespace list
+  open prod
+  notation h :: t  := cons h t
+  notation `[` l:(foldr `, ` (h t, cons h t) nil `]`) := l
+
+  definition map {A B : Type} (f : A → B) : list A → list B
+  | []       := []
+  | (a :: l) := f a :: map l
+
+  definition foldl {A B : Type} (f : A → B → A) : A → list B → A
+  | a []       := a
+  | a (b :: l) := foldl (f a b) l
+
+  definition foldr {A B : Type} (f : A → B → B) : B → list A → B
+  | b []       := b
+  | b (a :: l) := f a (foldr b l)
+
+  definition prods.{u v} {A : Type.{u}} (P : A → Type.{v}) (l : list A) : Type.{v} := foldr prod poly_unit (map P l)
+
+  definition dprods.{u v w} {A : Type.{u}} {P : A → Type.{v}} (Q : Πa, P a → Type.{w}) : Π(l : list A), prods P l → Type.{w}
+  | []       poly_unit.star := poly_unit
+  | (a :: l) (p, v) := Q a p × dprods l v
+
+end list
