@@ -1188,7 +1188,7 @@ namespace int
     { exact minus_two_le -1 }
   end
 
-  -- the is maxm1 minus 1
+  -- this is maxm1 minus 1
   definition maxm1m1 [unfold 1] : ℤ → ℕ₋₂ :=
   λ n, int.cases_on n (λ k, k.-1) (λ k, -2)
 
@@ -1235,7 +1235,7 @@ namespace int
   definition le_add_nat (n : ℤ) (m : ℕ) : n ≤ n + m :=
   le.intro rfl
 
-  definition le_add_one (n : ℤ) : n ≤ n + 1:=
+  definition le_add_one (n : ℤ) : n ≤ n + 1 :=
   le_add_nat n 1
 
   open trunc_index
