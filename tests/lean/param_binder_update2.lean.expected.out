@@ -1,4 +1,0 @@
-foo1 : Π {A} {B}, A → B → A
-foo2 : Π {A} B, A → B → A
-foo3 : Π A {B}, A → B → A
-foo4 : Π A B, A → B → A

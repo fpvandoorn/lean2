@@ -1,4 +1,0 @@
-function_expected.lean:18:35: error: function expected at
-  denoteTermExpr termExpr1
-which has type
-  Type₁

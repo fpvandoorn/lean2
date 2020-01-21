@@ -1,2 +1,0 @@
-g (f x Px1) (f x Px1)
-g (f x Px1) (g (f x Px1) (f x Px1))

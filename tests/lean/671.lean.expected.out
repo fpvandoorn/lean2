@@ -1,2 +1,0 @@
-protected definition nat.add : ℕ → ℕ → ℕ :=
-λ a, nat.rec a (λ b₁, nat.succ)

@@ -1,4 +1,0 @@
-id2 : (A → B → A) → A
-id2 : (A → B → A) → A
-id2 : ?B → (A → ?B → A) → A
-id2 : ?A → (Π {B}, B → (?A → B → ?A) → ?A)

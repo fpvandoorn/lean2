@@ -1,2 +1,0 @@
-bad_structures.lean:1:71: error: invalid 'structure', the resultant universe must be provided when explicit universe levels are being used
-bad_structures.lean:4:49: error: invalid 'structure', the resultant universe must be provided when explicit universe levels are being used
