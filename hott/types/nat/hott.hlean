@@ -1,19 +1,19 @@
-/-
+(*
 Copyright (c) 2015 Floris van Doorn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Author: Floris van Doorn
 
 Theorems about the natural numbers specific to HoTT
--/
+*)
 
 import .order types.pointed .sub
 
 open is_trunc unit empty eq equiv algebra pointed is_equiv equiv function
 
 namespace nat
-  definition is_prop_le [instance] (n m : ℕ) : is_prop (n ≤ m) :=
-  begin
-    have lem : Π{n m : ℕ} (p : n ≤ m) (q : n = m), p = q ▸ le.refl n,
+Definition is_prop_le [instance] (n m : ℕ) : is_prop (n ≤ m) :=
+Proof.
+    have lem : forall {n m : ℕ} (p : n ≤ m) (q : n = m), p = q # le.refl n,
     begin
       intros, cases p,
       { have H' : q = idp, by apply is_set.elim,
@@ -25,83 +25,83 @@ namespace nat
     { cases H1,
       { exfalso, apply not_succ_le_self a},
       { exact ap le.step !v_0}},
-  end
+Defined.
 
-  definition is_prop_lt [instance] (n m : ℕ) : is_prop (n < m) := !is_prop_le
+Definition is_prop_lt [instance] (n m : ℕ) : is_prop (n < m) := !is_prop_le
 
-  definition le_equiv_succ_le_succ (n m : ℕ) : (n ≤ m) ≃ (succ n ≤ succ m) :=
+Definition le_equiv_succ_le_succ (n m : ℕ) : (n ≤ m) <~> (succ n ≤ succ m) :=
   equiv_of_is_prop succ_le_succ le_of_succ_le_succ
-  definition le_succ_equiv_pred_le (n m : ℕ) : (n ≤ succ m) ≃ (pred n ≤ m) :=
+Definition le_succ_equiv_pred_le (n m : ℕ) : (n ≤ succ m) <~> (pred n ≤ m) :=
   equiv_of_is_prop pred_le_pred le_succ_of_pred_le
 
-  theorem lt_by_cases_lt {a b : ℕ} {P : Type} (H1 : a < b → P) (H2 : a = b → P)
-    (H3 : a > b → P) (H : a < b) : lt.by_cases H1 H2 H3 = H1 H :=
-  begin
+Definition lt_by_cases_lt {a b : ℕ} {P : Type} (H1 : a < b -> P) (H2 : a = b -> P)
+    (H3 : a > b -> P) (H : a < b) : lt.by_cases H1 H2 H3 = H1 H :=
+Proof.
     unfold lt.by_cases, induction (lt.trichotomy a b) with H' H',
      { esimp, exact ap H1 !is_prop.elim},
-     { exfalso, cases H' with H' H', apply lt.irrefl, exact H' ▸ H, exact lt.asymm H H'}
-  end
+     { exfalso, cases H' with H' H', apply lt.irrefl, exact H' # H, exact lt.asymm H H'}
+Defined.
 
-  theorem lt_by_cases_eq {a b : ℕ} {P : Type} (H1 : a < b → P) (H2 : a = b → P)
-    (H3 : a > b → P) (H : a = b) : lt.by_cases H1 H2 H3 = H2 H :=
-  begin
+Definition lt_by_cases_eq {a b : ℕ} {P : Type} (H1 : a < b -> P) (H2 : a = b -> P)
+    (H3 : a > b -> P) (H : a = b) : lt.by_cases H1 H2 H3 = H2 H :=
+Proof.
     unfold lt.by_cases, induction (lt.trichotomy a b) with H' H',
-    { exfalso, apply lt.irrefl, exact H ▸ H'},
-    { cases H' with H' H', esimp, exact ap H2 !is_prop.elim, exfalso, apply lt.irrefl, exact H ▸ H'}
-  end
+    { exfalso, apply lt.irrefl, exact H # H'},
+    { cases H' with H' H', esimp, exact ap H2 !is_prop.elim, exfalso, apply lt.irrefl, exact H # H'}
+Defined.
 
-  theorem lt_by_cases_ge {a b : ℕ} {P : Type} (H1 : a < b → P) (H2 : a = b → P)
-    (H3 : a > b → P) (H : a > b) : lt.by_cases H1 H2 H3 = H3 H :=
-  begin
+Definition lt_by_cases_ge {a b : ℕ} {P : Type} (H1 : a < b -> P) (H2 : a = b -> P)
+    (H3 : a > b -> P) (H : a > b) : lt.by_cases H1 H2 H3 = H3 H :=
+Proof.
     unfold lt.by_cases, induction (lt.trichotomy a b) with H' H',
     { exfalso, exact lt.asymm H H'},
-    { cases H' with H' H', exfalso, apply lt.irrefl, exact H' ▸ H, esimp, exact ap H3 !is_prop.elim}
-  end
+    { cases H' with H' H', exfalso, apply lt.irrefl, exact H' # H, esimp, exact ap H3 !is_prop.elim}
+Defined.
 
-  theorem lt_ge_by_cases_lt {n m : ℕ} {P : Type} (H1 : n < m → P) (H2 : n ≥ m → P)
+Definition lt_ge_by_cases_lt {n m : ℕ} {P : Type} (H1 : n < m -> P) (H2 : n ≥ m -> P)
     (H : n < m) : lt_ge_by_cases H1 H2 = H1 H :=
   by apply lt_by_cases_lt
 
-  theorem lt_ge_by_cases_ge {n m : ℕ} {P : Type} (H1 : n < m → P) (H2 : n ≥ m → P)
+Definition lt_ge_by_cases_ge {n m : ℕ} {P : Type} (H1 : n < m -> P) (H2 : n ≥ m -> P)
     (H : n ≥ m) : lt_ge_by_cases H1 H2 = H2 H :=
-  begin
+Proof.
     unfold [lt_ge_by_cases,lt.by_cases], induction (lt.trichotomy n m) with H' H',
     { exfalso, apply lt.irrefl, exact lt_of_le_of_lt H H'},
     { cases H' with H' H'; all_goals (esimp; apply ap H2 !is_prop.elim)}
-  end
+Defined.
 
-  theorem lt_ge_by_cases_le {n m : ℕ} {P : Type} {H1 : n ≤ m → P} {H2 : n ≥ m → P}
-    (H : n ≤ m) (Heq : Π(p : n = m), H1 (le_of_eq p) = H2 (le_of_eq p⁻¹))
-    : lt_ge_by_cases (λH', H1 (le_of_lt H')) H2 = H1 H :=
-  begin
+Definition lt_ge_by_cases_le {n m : ℕ} {P : Type} {H1 : n ≤ m -> P} {H2 : n ≥ m -> P}
+    (H : n ≤ m) (Heq : forall (p : n = m), H1 (le_of_eq p) = H2 (le_of_eq p^-1))
+    : lt_ge_by_cases (fun H' => H1 (le_of_lt H')) H2 = H1 H :=
+Proof.
     unfold [lt_ge_by_cases,lt.by_cases], induction (lt.trichotomy n m) with H' H',
     { esimp, apply ap H1 !is_prop.elim},
     { cases H' with H' H',
       { esimp, induction H', esimp, symmetry,
-        exact ap H1 !is_prop.elim ⬝ Heq idp ⬝ ap H2 !is_prop.elim},
+        exact ap H1 !is_prop.elim @ Heq idp @ ap H2 !is_prop.elim},
       { exfalso, apply lt.irrefl, apply lt_of_le_of_lt H H'}}
-  end
+Defined.
 
-  protected definition code [reducible] [unfold 1 2] : ℕ → ℕ → Type₀
+  protectedDefinition code [unfold 1 2] : ℕ -> ℕ -> Type₀
   | code 0        0        := unit
   | code 0        (succ m) := empty
   | code (succ n) 0        := empty
   | code (succ n) (succ m) := code n m
 
-  protected definition refl : Πn, nat.code n n
+  protectedDefinition refl : forall n, nat.code n n
   | refl 0        := star
   | refl (succ n) := refl n
 
-  protected definition encode [unfold 3] {n m : ℕ} (p : n = m) : nat.code n m :=
-  p ▸ nat.refl n
+  protectedDefinition encode {n m : ℕ} (p : n = m) : nat.code n m :=
+  p # nat.refl n
 
-  protected definition decode : Π(n m : ℕ), nat.code n m → n = m
-  | decode 0        0        := λc, idp
-  | decode 0        (succ l) := λc, empty.elim c _
-  | decode (succ k) 0        := λc, empty.elim c _
-  | decode (succ k) (succ l) := λc, ap succ (decode k l c)
+  protectedDefinition decode : forall (n m : ℕ), nat.code n m -> n = m
+  | decode 0        0        := fun c => idp
+  | decode 0        (succ l) := fun c => empty.elim c _
+  | decode (succ k) 0        := fun c => empty.elim c _
+  | decode (succ k) (succ l) := fun c => ap succ (decode k l c)
 
-  definition nat_eq_equiv (n m : ℕ) : (n = m) ≃ nat.code n m :=
+Definition nat_eq_equiv (n m : ℕ) : (n = m) <~> nat.code n m :=
   equiv.MK nat.encode
            !nat.decode
            begin
@@ -116,125 +116,125 @@ namespace nat
                rewrite [↑nat.decode,↑nat.refl,v_0]
            end
 
-  definition pointed_nat [instance] [constructor] : pointed ℕ :=
+Definition pointed_nat [instance] : pointed ℕ :=
   pointed.mk 0
 
   open sigma sum
-  definition eq_even_or_eq_odd (n : ℕ) : (Σk, 2 * k = n) ⊎ (Σk, 2 * k + 1 = n) :=
-  begin
+Definition eq_even_or_eq_odd (n : ℕ) : (Σk, 2 * k = n) ⊎ (Σk, 2 * k + 1 = n) :=
+Proof.
     induction n with n IH,
     { exact inl ⟨0, idp⟩},
     { induction IH with H H: induction H with k p: induction p,
       { exact inr ⟨k, idp⟩},
       { refine inl ⟨k+1, idp⟩}}
-  end
+Defined.
 
-  definition rec_on_even_odd {P : ℕ → Type} (n : ℕ) (H : Πk, P (2 * k)) (H2 : Πk, P (2 * k + 1))
+Definition rec_on_even_odd {P : ℕ -> Type} (n : ℕ) (H : forall k, P (2 * k)) (H2 : forall k, P (2 * k + 1))
     : P n :=
-  begin
+Proof.
     cases eq_even_or_eq_odd n with v v: induction v with k p: induction p,
     { exact H k},
     { exact H2 k}
-  end
+Defined.
 
-  /- this inequality comes up a couple of times when using the freudenthal suspension theorem -/
-  definition add_mul_le_mul_add (n m k : ℕ) : n + (succ m) * k ≤ (succ m) * (n + k) :=
+  (* this inequality comes up a couple of times when using the freudenthal suspensionDefinition *)
+Definition add_mul_le_mul_add (n m k : ℕ) : n + (succ m) * k ≤ (succ m) * (n + k) :=
   calc
     n + (succ m) * k ≤ (m * n + n) + (succ m) * k : add_le_add_right !le_add_left _
       ... = (succ m) * n + (succ m) * k : by rewrite -succ_mul
-      ... = (succ m) * (n + k) : !left_distrib⁻¹
+      ... = (succ m) * (n + k) : !left_distrib^-1
 
-  /-
+  (*
     Some operations work only for successors. For example fin (succ n) has a 0 and a 1, but fin 0
     doesn't. However, we want a bit more, because sometimes we want a zero of (fin a)
     where a is either
-    - equal to a successor, but not definitionally a successor (e.g. (0 : fin (3 + n)))
-    - definitionally equal to a successor, but not in a way that type class inference can infer.
+    - equal to a successor, but notDefinitionally a successor (e.g. (0 : fin (3 + n)))
+    -Definitionally equal to a successor, but not in a way that type class inference can infer.
       (e.g. (0 : fin 4). Note that 4 is bit0 (bit0 one), but (bit0 x) (defined as x + x),
         is not always a successor)
     To solve this we use an auxillary class `is_succ` which can solve whether a number is a
     successor.
-  -/
+  *)
 
-  inductive is_succ [class] : ℕ → Type :=
-  | mk : Π(n : ℕ), is_succ (succ n)
+  inductive is_succ [class] : ℕ -> Type :=
+  | mk : forall (n : ℕ), is_succ (succ n)
 
   attribute is_succ.mk [instance]
 
-  definition is_succ_1 [instance] : is_succ 1 := is_succ.mk 0
+Definition is_succ_1 [instance] : is_succ 1 := is_succ.mk 0
 
-  definition is_succ_add_right [instance] [constructor] (n m : ℕ) [H : is_succ m] : is_succ (n+m) :=
+Definition is_succ_add_right [instance] (n m : ℕ) [H : is_succ m] : is_succ (n+m) :=
   by induction H with m; constructor
 
-  definition is_succ_add_left [instance] [priority 900] [constructor] (n m : ℕ) [H : is_succ n] :
+Definition is_succ_add_left [instance] [priority 900] (n m : ℕ) [H : is_succ n] :
     is_succ (n+m) :=
   by induction H with n; cases m with m: constructor
 
-  definition is_succ_bit0 [constructor] (n : ℕ) [H : is_succ n] : is_succ (bit0 n) :=
+Definition is_succ_bit0 (n : ℕ) [H : is_succ n] : is_succ (bit0 n) :=
   by exact _
 
-  -- level 2 is useful for abelian homotopy groups, which only exist at level 2 and higher
-  inductive is_at_least_two [class] : ℕ → Type :=
-  | mk : Π(n : ℕ), is_at_least_two (succ (succ n))
+  (* level 2 is useful for abelian homotopy groups, which only exist at level 2 and higher *)
+  inductive is_at_least_two [class] : ℕ -> Type :=
+  | mk : forall (n : ℕ), is_at_least_two (succ (succ n))
 
   attribute is_at_least_two.mk [instance]
 
-  definition is_at_least_two_add_right [instance] [constructor] (n m : ℕ) [H : is_at_least_two m] :
+Definition is_at_least_two_add_right [instance] (n m : ℕ) [H : is_at_least_two m] :
     is_at_least_two (n+m) :=
   by induction H with m; constructor
 
-  definition is_at_least_two_add_left [instance] [constructor] (n m : ℕ) [H : is_at_least_two n] :
+Definition is_at_least_two_add_left [instance] (n m : ℕ) [H : is_at_least_two n] :
     is_at_least_two (n+m) :=
   by induction H with n; cases m with m: try cases m with m: constructor
 
-  definition is_at_least_two_add_both [instance] [priority 900] [constructor] (n m : ℕ)
+Definition is_at_least_two_add_both [instance] [priority 900] (n m : ℕ)
     [H : is_succ n] [K : is_succ m] : is_at_least_two (n+m) :=
   by induction H with n; induction K with m; cases m with m: constructor
 
-  definition is_at_least_two_bit0 [constructor] (n : ℕ) [H : is_succ n] : is_at_least_two (bit0 n) :=
+Definition is_at_least_two_bit0 (n : ℕ) [H : is_succ n] : is_at_least_two (bit0 n) :=
   by exact _
 
-  definition is_at_least_two_bit1 [constructor] (n : ℕ) [H : is_succ n] : is_at_least_two (bit1 n) :=
+Definition is_at_least_two_bit1 (n : ℕ) [H : is_succ n] : is_at_least_two (bit1 n) :=
   by exact _
 
-  /- some facts about iterate -/
+  (* some facts about iterate *)
 
-  definition iterate_succ {A : Type} (f : A → A) (n : ℕ) (x : A) :
+Definition iterate_succ {A : Type} (f : A -> A) (n : ℕ) (x : A) :
     f^[succ n] x = f^[n] (f x) :=
   by induction n with n p; reflexivity; exact ap f p
 
-  lemma iterate_sub {A : Type} (f : A ≃ A) {n m : ℕ} (h : n ≥ m) (a : A) :
-    iterate f (n - m) a = iterate f n (iterate f⁻¹ m a) :=
-  begin
+  lemma iterate_sub {A : Type} (f : A <~> A) {n m : ℕ} (h : n ≥ m) (a : A) :
+    iterate f (n - m) a = iterate f n (iterate f^-1 m a) :=
+Proof.
     revert n h, induction m with m p: intro n h,
     { reflexivity },
     { cases n with n, exfalso, apply not_succ_le_zero _ h,
-      rewrite [succ_sub_succ], refine p n (le_of_succ_le_succ h) ⬝ _,
-      refine ap (f^[n]) _ ⬝ !iterate_succ⁻¹, exact !to_right_inv⁻¹ }
-  end
+      rewrite [succ_sub_succ], refine p n (le_of_succ_le_succ h) @ _,
+      refine ap (f^[n]) _ @ !iterate_succ^-1, exact !to_right_inv^-1 }
+Defined.
 
-  definition iterate_commute {A : Type} {f g : A → A} (n : ℕ) (h : f ∘ g ~ g ∘ f) :
-    iterate f n ∘ g ~ g ∘ iterate f n :=
-  by induction n with n IH; reflexivity; exact λx, ap f (IH x) ⬝ !h
+Definition iterate_commute {A : Type} {f g : A -> A} (n : ℕ) (h : f o g == g o f) :
+    iterate f n o g == g o iterate f n :=
+  by induction n with n IH; reflexivity; exact fun x => ap f (IH x) @ !h
 
-  definition iterate_equiv {A : Type} (f : A ≃ A) (n : ℕ) : A ≃ A :=
+Definition iterate_equiv {A : Type} (f : A <~> A) (n : ℕ) : A <~> A :=
   equiv.mk (iterate f n)
            (by induction n with n IH; apply is_equiv_id; exact is_equiv_compose f (iterate f n))
 
-  definition iterate_inv {A : Type} (f : A ≃ A) (n : ℕ) :
-    (iterate_equiv f n)⁻¹ ~ iterate f⁻¹ n :=
-  begin
+Definition iterate_inv {A : Type} (f : A <~> A) (n : ℕ) :
+    (iterate_equiv f n)^-1 == iterate f^-1 n :=
+Proof.
     induction n with n p: intro a,
       reflexivity,
-      exact p (f⁻¹ a) ⬝ !iterate_succ⁻¹
-  end
+      exact p (f^-1 a) @ !iterate_succ^-1
+Defined.
 
-  definition iterate_left_inv {A : Type} (f : A ≃ A) (n : ℕ) (a : A) : f⁻¹ᵉ^[n] (f^[n] a) = a :=
-  (iterate_inv f n (f^[n] a))⁻¹ ⬝ to_left_inv (iterate_equiv f n) a
+Definition iterate_left_inv {A : Type} (f : A <~> A) (n : ℕ) (a : A) : f^-1ᵉ^[n] (f^[n] a) = a :=
+  (iterate_inv f n (f^[n] a))^-1 @ to_left_inv (iterate_equiv f n) a
 
-  definition iterate_right_inv {A : Type} (f : A ≃ A) (n : ℕ) (a : A) : f^[n] (f⁻¹ᵉ^[n] a) = a :=
-  ap (f^[n]) (iterate_inv f n a)⁻¹ ⬝ to_right_inv (iterate_equiv f n) a
+Definition iterate_right_inv {A : Type} (f : A <~> A) (n : ℕ) (a : A) : f^[n] (f^-1ᵉ^[n] a) = a :=
+  ap (f^[n]) (iterate_inv f n a)^-1 @ to_right_inv (iterate_equiv f n) a
 
 
 
-end nat
+Defined. nat

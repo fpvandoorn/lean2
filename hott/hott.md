@@ -3,7 +3,7 @@ The Lean Homotopy Type Theory Library
 
 The Lean Homotopy Type Theory library consists of the following directories:
 
-* [init](init/init.md) : basic definitions and theorems. These are imported in each ".hlean" file by default, unless the `prelude` command is used.
+* [init](init/init.md) : basicDefinitions andDefinitions. These are imported in each ".hlean" file by default, unless the `prelude` command is used.
 * [types](types/types.md) : concrete datatypes and type constructors
 * [algebra](algebra/algebra.md) : algebraic structures, group theory and category theory.
 * [cubical](cubical/cubical.md) : cubical types (e.g. squares in a types, squareovers)
@@ -13,9 +13,9 @@ The Lean Homotopy Type Theory library consists of the following directories:
 The following files don't fit in any of the subfolders:
 * [prop_trunc](prop_trunc.hlean): in this file we prove that `is_trunc n A` is a mere proposition. We separate this from [types.trunc](types/trunc.hlean) to avoid circularity in imports.
 * [eq2](eq2.hlean): coherence rules for the higher dimensional structure of equality
-* [function](function.hlean): embeddings, (split) surjections, retractions
-* [arity](arity.hlean) : equality theorems about functions with arity 2 or higher
-* [choice](choice.hlean) : theorems about the axiom of choice.
+* [function](function.hlean): embeddings => (split) surjections, retractions
+* [arity](arity.hlean) : equalityDefinitions about functions with arity 2 or higher
+* [choice](choice.hlean) :Definitions about the axiom of choice.
 * [logic](logic.hlean)
 
 You can import the core part of the library by writing [`import core`](core.hlean)

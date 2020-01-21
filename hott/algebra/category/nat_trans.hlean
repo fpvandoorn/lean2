@@ -1,84 +1,84 @@
-/-
+(*
 Copyright (c) 2015 Floris van Doorn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Author: Floris van Doorn, Jakob von Raumer
--/
+*)
 
 import .functor.basic
 open eq category functor is_trunc equiv sigma.ops sigma is_equiv function pi funext iso
 
 structure nat_trans {C : Precategory} {D : Precategory} (F G : C ⇒ D)
-  : Type :=
- (natural_map : Π (a : C), hom (F a) (G a))
- (naturality : Π {a b : C} (f : hom a b), G f ∘ natural_map a = natural_map b ∘ F f)
+  : Type.
+ (natural_map : forall (a : C), hom (F a) (G a))
+ (naturality : forall {a b : C} (f : hom a b), G f o natural_map a = natural_map b o F f)
 
 namespace nat_trans
 
-  infixl ` ⟹ `:25 := nat_trans -- \==>
+  infixl ` ⟹ `:25 . nat_trans (* \= => *)
   variables {B C D E : Precategory} {F G H I : C ⇒ D} {F' G' : D ⇒ E} {F'' G'' : E ⇒ B} {J : C ⇒ C}
 
   attribute natural_map [coercion]
 
-  protected definition compose [constructor] (η : G ⟹ H) (θ : F ⟹ G) : F ⟹ H :=
+  protectedDefinition compose (η : G ⟹ H) (θ : F ⟹ G) : F ⟹ H.
   nat_trans.mk
-    (λ a, η a ∘ θ a)
-    (λ a b f,
+    (fun a => η a o θ a)
+    (fun a b f =>
       abstract calc
-        H f ∘ (η a ∘ θ a) = (H f ∘ η a) ∘ θ a : by rewrite assoc
-                      ... = (η b ∘ G f) ∘ θ a : by rewrite naturality
-                      ... = η b ∘ (G f ∘ θ a) : by rewrite assoc
-                      ... = η b ∘ (θ b ∘ F f) : by rewrite naturality
-                      ... = (η b ∘ θ b) ∘ F f : by rewrite assoc
+        H f o (η a o θ a) = (H f o η a) o θ a : by rewrite assoc
+                      ... = (η b o G f) o θ a : by rewrite naturality
+                      ... = η b o (G f o θ a) : by rewrite assoc
+                      ... = η b o (θ b o F f) : by rewrite naturality
+                      ... = (η b o θ b) o F f : by rewrite assoc
       end)
 
-  infixr ` ∘n `:60 := nat_trans.compose
+  infixr ` on `:60 . nat_trans.compose
 
-  definition compose_def (η : G ⟹ H) (θ : F ⟹ G) (c : C) : (η ∘n θ) c = η c ∘ θ c := idp
+Definition compose_def (η : G ⟹ H) (θ : F ⟹ G) (c : C) : (η on θ) c = η c o θ c . idp
 
-  protected definition id [reducible] [constructor] {F : C ⇒ D} : nat_trans F F :=
-  mk (λa, id) (λa b f, !id_right ⬝ !id_left⁻¹)
+  protectedDefinition id {F : C ⇒ D} : nat_trans F F.
+  mk (fun a => id) (fun a b f => !id_right @ !id_left^-1)
 
-  protected definition ID [reducible] [constructor] (F : C ⇒ D) : nat_trans F F :=
+  protectedDefinition ID (F : C ⇒ D) : nat_trans F F.
   (@nat_trans.id C D F)
 
-  notation 1 := nat_trans.id
+  notation 1 . nat_trans.id
 
-  definition constant_nat_trans [constructor] (C : Precategory) {D : Precategory} {d d' : D}
-    (g : d ⟶ d') : constant_functor C d ⟹ constant_functor C d' :=
-  mk (λc, g) (λc c' f, !id_comp_eq_comp_id)
+Definition constant_nat_trans (C : Precategory) {D : Precategory} {d d' : D}
+    (g : d ⟶ d') : constant_functor C d ⟹ constant_functor C d'.
+  mk (fun c => g) (fun c c' f => !id_comp_eq_comp_id)
 
   open iso
-  definition naturality_iso_left (η : F ⟹ G) {a b : C} (f : a ≅ b) : η a = (G f)⁻¹ ∘ η b ∘ F f :=
+Definition naturality_iso_left (η : F ⟹ G) {a b : C} (f : a ≅ b) : η a = (G f)^-1 o η b o F f.
   by apply eq_inverse_comp_of_comp_eq; apply naturality
 
-  definition naturality_iso_right (η : F ⟹ G) {a b : C} (f : a ≅ b) : η b = G f ∘ η a ∘ (F f)⁻¹ :=
-  by refine _⁻¹ ⬝ !assoc⁻¹; apply comp_inverse_eq_of_eq_comp; apply naturality
+Definition naturality_iso_right (η : F ⟹ G) {a b : C} (f : a ≅ b) : η b = G f o η a o (F f)^-1.
+  by refine _^-1 @ !assoc^-1; apply comp_inverse_eq_of_eq_comp; apply naturality
 
-  definition nat_trans_mk_eq {η₁ η₂ : Π (a : C), hom (F a) (G a)}
-    (nat₁ : Π (a b : C) (f : hom a b), G f ∘ η₁ a = η₁ b ∘ F f)
-    (nat₂ : Π (a b : C) (f : hom a b), G f ∘ η₂ a = η₂ b ∘ F f)
-    (p : η₁ ~ η₂)
-      : nat_trans.mk η₁ nat₁ = nat_trans.mk η₂ nat₂ :=
+Definition nat_trans_mk_eq {η₁ η₂ : forall (a : C), hom (F a) (G a)}
+    (nat₁ : forall (a b : C) (f : hom a b), G f o η₁ a = η₁ b o F f)
+    (nat₂ : forall (a b : C) (f : hom a b), G f o η₂ a = η₂ b o F f)
+    (p : η₁ == η₂)
+      : nat_trans.mk η₁ nat₁ = nat_trans.mk η₂ nat₂.
   apd011 nat_trans.mk (eq_of_homotopy p) !is_prop.elimo
 
-  definition nat_trans_eq {η₁ η₂ : F ⟹ G} : natural_map η₁ ~ natural_map η₂ → η₁ = η₂ :=
+Definition nat_trans_eq {η₁ η₂ : F ⟹ G} : natural_map η₁ == natural_map η₂ -> η₁ = η₂.
   by induction η₁; induction η₂; apply nat_trans_mk_eq
 
-  protected definition assoc (η₃ : H ⟹ I) (η₂ : G ⟹ H) (η₁ : F ⟹ G) :
-      η₃ ∘n (η₂ ∘n η₁) = (η₃ ∘n η₂) ∘n η₁ :=
-  nat_trans_eq (λa, !assoc)
+  protectedDefinition assoc (η₃ : H ⟹ I) (η₂ : G ⟹ H) (η₁ : F ⟹ G) :
+      η₃ on (η₂ on η₁) = (η₃ on η₂) on η₁.
+  nat_trans_eq (fun a => !assoc)
 
-  protected definition id_left (η : F ⟹ G) : 1 ∘n η = η :=
-  nat_trans_eq (λa, !id_left)
+  protectedDefinition id_left (η : F ⟹ G) : 1 on η = η.
+  nat_trans_eq (fun a => !id_left)
 
-  protected definition id_right (η : F ⟹ G) : η ∘n 1 = η :=
-  nat_trans_eq (λa, !id_right)
+  protectedDefinition id_right (η : F ⟹ G) : η on 1 = η.
+  nat_trans_eq (fun a => !id_right)
 
-  protected definition sigma_char (F G : C ⇒ D) :
-    (Σ (η : Π (a : C), hom (F a) (G a)), Π (a b : C) (f : hom a b), G f ∘ η a = η b ∘ F f) ≃  (F ⟹ G) :=
-  begin
+  protectedDefinition sigma_char (F G : C ⇒ D) :
+    (Σ (η : forall (a : C), hom (F a) (G a)), forall (a b : C) (f : hom a b), G f o η a = η b o F f) <~>  (F ⟹ G).
+Proof.
     fapply equiv.mk,
-      -- TODO(Leo): investigate why we need to use rexact in the following line
+      (* TODO(Leo): investigate why we need to use rexact in the following line *)
       {intro S, apply nat_trans.mk, rexact (S.2)},
     fapply adjointify,
       intro H,
@@ -90,108 +90,108 @@ namespace nat_trans
     fapply sigma_eq,
     { apply eq_of_homotopy, intro a, apply idp},
     { apply is_prop.elimo}
-  end
+Defined.
 
-  definition is_set_nat_trans [instance] : is_set (F ⟹ G) :=
+Definition is_set_nat_trans [instance] : is_set (F ⟹ G).
   by apply is_trunc_is_equiv_closed; apply (equiv.to_is_equiv !nat_trans.sigma_char)
 
-  definition change_natural_map [constructor] (η : F ⟹ G) (f : Π (a : C), F a ⟶ G a)
-    (p : Πa, η a = f a) : F ⟹ G :=
-  nat_trans.mk f (λa b g, p a ▸ p b ▸ naturality η g)
+Definition change_natural_map (η : F ⟹ G) (f : forall (a : C), F a ⟶ G a)
+    (p : forall a, η a = f a) : F ⟹ G.
+  nat_trans.mk f (fun a b g => p a # p b # naturality η g)
 
-  definition nat_trans_functor_compose [constructor] (η : G ⟹ H) (F : E ⇒ C)
-    : G ∘f F ⟹ H ∘f F :=
+Definition nat_trans_functor_compose (η : G ⟹ H) (F : E ⇒ C)
+    : G of F ⟹ H of F.
   nat_trans.mk
-    (λ a, η (F a))
-    (λ a b f, naturality η (F f))
+    (fun a => η (F a))
+    (fun a b f => naturality η (F f))
 
-  definition functor_nat_trans_compose [constructor] (F : D ⇒ E) (η : G ⟹ H)
-    : F ∘f G ⟹ F ∘f H :=
+Definition functor_nat_trans_compose (F : D ⇒ E) (η : G ⟹ H)
+    : F of G ⟹ F of H.
   nat_trans.mk
-    (λ a, F (η a))
-    (λ a b f, calc
-      F (H f) ∘ F (η a) = F (H f ∘ η a) : by rewrite respect_comp
-        ... = F (η b ∘ G f)             : by rewrite (naturality η f)
-        ... = F (η b) ∘ F (G f)         : by rewrite respect_comp)
+    (fun a => F (η a))
+    (fun a b f => calc
+      F (H f) o F (η a) = F (H f o η a) : by rewrite respect_comp
+        ... = F (η b o G f)             : by rewrite (naturality η f)
+        ... = F (η b) o F (G f)         : by rewrite respect_comp)
 
-  definition nat_trans_id_functor_compose [constructor] (η : J ⟹ 1) (F : E ⇒ C)
-    : J ∘f F ⟹ F :=
+Definition nat_trans_id_functor_compose (η : J ⟹ 1) (F : E ⇒ C)
+    : J of F ⟹ F.
   nat_trans.mk
-    (λ a, η (F a))
-    (λ a b f, naturality η (F f))
+    (fun a => η (F a))
+    (fun a b f => naturality η (F f))
 
-  definition id_nat_trans_functor_compose [constructor] (η : 1 ⟹ J) (F : E ⇒ C)
-    : F ⟹ J ∘f F :=
+Definition id_nat_trans_functor_compose (η : 1 ⟹ J) (F : E ⇒ C)
+    : F ⟹ J of F.
   nat_trans.mk
-    (λ a, η (F a))
-    (λ a b f, naturality η (F f))
+    (fun a => η (F a))
+    (fun a b f => naturality η (F f))
 
-  definition functor_nat_trans_id_compose [constructor] (F : C ⇒ D) (η : J ⟹ 1)
-    : F ∘f J ⟹ F :=
+Definition functor_nat_trans_id_compose (F : C ⇒ D) (η : J ⟹ 1)
+    : F of J ⟹ F.
   nat_trans.mk
-    (λ a, F (η a))
-    (λ a b f, calc
-      F f ∘ F (η a) = F (f ∘ η a) : by rewrite respect_comp
-        ... = F (η b ∘ J f)       : by rewrite (naturality η f)
-        ... = F (η b) ∘ F (J f)   : by rewrite respect_comp)
+    (fun a => F (η a))
+    (fun a b f => calc
+      F f o F (η a) = F (f o η a) : by rewrite respect_comp
+        ... = F (η b o J f)       : by rewrite (naturality η f)
+        ... = F (η b) o F (J f)   : by rewrite respect_comp)
 
-  definition functor_id_nat_trans_compose [constructor] (F : C ⇒ D) (η : 1 ⟹ J)
-    : F ⟹ F ∘f J :=
+Definition functor_id_nat_trans_compose (F : C ⇒ D) (η : 1 ⟹ J)
+    : F ⟹ F of J.
   nat_trans.mk
-    (λ a, F (η a))
-    (λ a b f, calc
-      F (J f) ∘ F (η a) = F (J f ∘ η a) : by rewrite respect_comp
-        ... = F (η b ∘ f)               : by rewrite (naturality η f)
-        ... = F (η b) ∘ F f             : by rewrite respect_comp)
+    (fun a => F (η a))
+    (fun a b f => calc
+      F (J f) o F (η a) = F (J f o η a) : by rewrite respect_comp
+        ... = F (η b o f)               : by rewrite (naturality η f)
+        ... = F (η b) o F f             : by rewrite respect_comp)
 
-  infixr ` ∘nf ` :62 := nat_trans_functor_compose
-  infixr ` ∘fn ` :62 := functor_nat_trans_compose
-  infixr ` ∘n1f `:62 := nat_trans_id_functor_compose
-  infixr ` ∘1nf `:62 := id_nat_trans_functor_compose
-  infixr ` ∘f1n `:62 := functor_id_nat_trans_compose
-  infixr ` ∘fn1 `:62 := functor_nat_trans_id_compose
+  infixr ` onf ` :62 . nat_trans_functor_compose
+  infixr ` ofn ` :62 . functor_nat_trans_compose
+  infixr ` on1f `:62 . nat_trans_id_functor_compose
+  infixr ` o1nf `:62 . id_nat_trans_functor_compose
+  infixr ` of1n `:62 . functor_id_nat_trans_compose
+  infixr ` ofn1 `:62 . functor_nat_trans_id_compose
 
-  definition nf_fn_eq_fn_nf_pt (η : F ⟹ G) (θ : F' ⟹ G') (c : C)
-    : (θ (G c)) ∘ (F' (η c)) = (G' (η c)) ∘ (θ (F c)) :=
-  (naturality θ (η c))⁻¹
+Definition nf_fn_eq_fn_nf_pt (η : F ⟹ G) (θ : F' ⟹ G') (c : C)
+    : (θ (G c)) o (F' (η c)) = (G' (η c)) o (θ (F c)).
+  (naturality θ (η c))^-1
 
   variable (F')
-  definition nf_fn_eq_fn_nf_pt' (η : F ⟹ G) (θ : F'' ⟹ G'') (c : C)
-    : (θ (F' (G c))) ∘ (F'' (F' (η c))) = (G'' (F' (η c))) ∘ (θ (F' (F c))) :=
-  (naturality θ (F' (η c)))⁻¹
+Definition nf_fn_eq_fn_nf_pt' (η : F ⟹ G) (θ : F'' ⟹ G'') (c : C)
+    : (θ (F' (G c))) o (F'' (F' (η c))) = (G'' (F' (η c))) o (θ (F' (F c))).
+  (naturality θ (F' (η c)))^-1
   variable {F'}
 
-  definition nf_fn_eq_fn_nf (η : F ⟹ G) (θ : F' ⟹ G')
-    : (θ ∘nf G) ∘n (F' ∘fn η) = (G' ∘fn η) ∘n (θ ∘nf F) :=
-  nat_trans_eq (λ c, nf_fn_eq_fn_nf_pt η θ c)
+Definition nf_fn_eq_fn_nf (η : F ⟹ G) (θ : F' ⟹ G')
+    : (θ onf G) on (F' ofn η) = (G' ofn η) on (θ onf F).
+  nat_trans_eq (fun c => nf_fn_eq_fn_nf_pt η θ c)
 
-  definition fn_n_distrib (F' : D ⇒ E) (η : G ⟹ H) (θ : F ⟹ G)
-    : F' ∘fn (η ∘n θ) = (F' ∘fn η) ∘n (F' ∘fn θ) :=
-  nat_trans_eq (λc, by apply respect_comp)
+Definition fn_n_distrib (F' : D ⇒ E) (η : G ⟹ H) (θ : F ⟹ G)
+    : F' ofn (η on θ) = (F' ofn η) on (F' ofn θ).
+  nat_trans_eq (fun c => by apply respect_comp)
 
-  definition n_nf_distrib (η : G ⟹ H) (θ : F ⟹ G) (F' : B ⇒ C)
-    : (η ∘n θ) ∘nf F' = (η ∘nf F') ∘n (θ ∘nf F') :=
-  nat_trans_eq (λc, idp)
+Definition n_nf_distrib (η : G ⟹ H) (θ : F ⟹ G) (F' : B ⇒ C)
+    : (η on θ) onf F' = (η onf F') on (θ onf F').
+  nat_trans_eq (fun c => idp)
 
-  definition fn_id (F' : D ⇒ E) : F' ∘fn nat_trans.ID F = 1 :=
-  nat_trans_eq (λc, by apply respect_id)
+Definition fn_id (F' : D ⇒ E) : F' ofn nat_trans.ID F = 1.
+  nat_trans_eq (fun c => by apply respect_id)
 
-  definition id_nf (F' : B ⇒ C) : nat_trans.ID F ∘nf F' = 1 :=
-  nat_trans_eq (λc, idp)
+Definition id_nf (F' : B ⇒ C) : nat_trans.ID F onf F' = 1.
+  nat_trans_eq (fun c => idp)
 
-  definition id_fn (η : G ⟹ H) (c : C) : (1 ∘fn η) c = η c :=
+Definition id_fn (η : G ⟹ H) (c : C) : (1 ofn η) c = η c.
   idp
 
-  definition nf_id (η : G ⟹ H) (c : C) : (η ∘nf 1) c = η c :=
+Definition nf_id (η : G ⟹ H) (c : C) : (η onf 1) c = η c.
   idp
 
-  definition nat_trans_of_eq [reducible] [constructor] (p : F = G) : F ⟹ G :=
-  nat_trans.mk (λc, hom_of_eq (ap010 to_fun_ob p c))
-               (λa b f, eq.rec_on p (!id_right ⬝ !id_left⁻¹))
+Definition nat_trans_of_eq (p : F = G) : F ⟹ G.
+  nat_trans.mk (fun c => hom_of_eq (ap010 to_fun_ob p c))
+               (fun a b f => eq.rec_on p (!id_right @ !id_left^-1))
 
-  definition compose_rev [unfold_full] (θ : F ⟹ G) (η : G ⟹ H) : F ⟹ H := η ∘n θ
+Definition compose_rev [unfold_full] (θ : F ⟹ G) (η : G ⟹ H) : F ⟹ H . η on θ
 
-end nat_trans
+Defined. nat_trans
 
-attribute nat_trans.compose_rev [trans]
-attribute nat_trans.id [refl]
+
+

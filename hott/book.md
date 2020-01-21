@@ -27,9 +27,9 @@ The rows indicate the chapters, the columns the sections.
 | Ch 10 | ¼ | - | - | - | - |   |   |   |   |    |    |    |    |    |    |
 | Ch 11 | - | - | - | - | - | - |   |   |   |    |    |    |    |    |    |
 
-Theorems and definitions in the library which are not in the book:
+Theorems andDefinitions in the library which are not in the book:
 
-* A major difference is that in this library we heavily use pathovers [D. Licata, G. Brunerie. A Cubical Approach to Synthetic Homotopy Theory]. This means that we need less theorems about transports, but instead corresponding theorems about pathovers. These are in [init.pathover](init/pathover.hlean). For higher paths there are [squares](cubical/square.hlean), [squareovers](cubical/squareover.hlean), and the rudiments of [cubes](cubical/cube.hlean) and [cubeovers](cubical/cubeover.hlean).
+* A major difference is that in this library we heavily use pathovers [D. Licata, G. Brunerie. A Cubical Approach to Synthetic Homotopy Theory]. This means that we need lessDefinitions about transports, but instead correspondingDefinitions about pathovers. These are in [init.pathover](init/pathover.hlean). For higher paths there are [squares](cubical/square.hlean), [squareovers](cubical/squareover.hlean), and the rudiments of [cubes](cubical/cube.hlean) and [cubeovers](cubical/cubeover.hlean).
 
 * The category theory library is more extensive than what is presented in the book. For example, we have [limits](algebra/category/limits/limits.md).
 
@@ -39,13 +39,13 @@ Chapter 1: Type theory
 - 1.1 (Type theory versus set theory): no formalizable content.
 - 1.2 (Function types): no formalizable content. Related: [init.function](init/function.hlean)
 - 1.3 (Universes and families): no formalizable content (Lean also has a hierarchy of universes `Type.{i} : Type.{i + 1}`, but they are *not* cumulative).
-- 1.4 (Dependent function types (Π-types)): no formalizable content. Related: [init.function](init/function.hlean)
+- 1.4 (Dependent function types (forall -types)): no formalizable content. Related: [init.function](init/function.hlean)
 - 1.5 (Product types): declaration in [init.datatypes](init/datatypes.hlean), notation in [init.types](init/types.hlean)
 - 1.6 (Dependent pair types (Σ-types)): declaration in [init.datatypes](init/datatypes.hlean), notation in [init.types](init/types.hlean)
 - 1.7 (Coproduct types): declaration in [init.datatypes](init/datatypes.hlean), notation in [init.types](init/types.hlean)
 - 1.8 (The type of booleans): declaration in [init.datatypes](init/datatypes.hlean), notation in [init.bool](init/bool.hlean)
 - 1.9 (The natural numbers): [init.nat](init/nat.hlean) (declaration in [init.datatypes](init/datatypes.hlean))
-- 1.10 (Pattern matching and recursion): no formalizable content (we can use the "pattern matching" notation using the function definition package, which are reduced to applying recursors).
+- 1.10 (Pattern matching and recursion): no formalizable content (we can use the "pattern matching" notation using the functionDefinition package => which are reduced to applying recursors).
 - 1.11 (Propositions as types): some logic is in [init.logic](init/logic.hlean) and [init.types](init/types.hlean).
 - 1.12 (Identity types): declaration in [init.datatypes](init/datatypes.hlean), more in [init.logic](init/logic.hlean)
 
@@ -60,7 +60,7 @@ Chapter 2: Homotopy type theory
 - 2.6 (Cartesian product types): [types.prod](types/prod.hlean)
 - 2.7 (Σ-types): [types.sigma](types/sigma.hlean)
 - 2.8 (The unit type): special case of [init.trunc](init/trunc.hlean)
-- 2.9 (Π-types and the function extensionality axiom): [init.funext](init/funext.hlean), [types.pi](types/pi.hlean) and [types.arrow](types/arrow.hlean)
+- 2.9 (forall , [types.pi](types/pi.hlean) and [types.arrow](types/arrow.hlean)
 - 2.10 (Universes and the univalence axiom): [init.ua](init/ua.hlean)
 - 2.11 (Identity type): [init.equiv](init/equiv.hlean) (ap is an equivalence), [types.eq](types/eq.hlean) and [cubical.square](cubical/square.hlean) (characterization of pathovers in equality types)
 - 2.12 (Coproducts): [types.sum](types/sum.hlean)
@@ -88,9 +88,9 @@ Chapter 4: Equivalences
 
 - 4.1 (Quasi-inverses): not formalized
 - 4.2 (Half adjoint equivalences): [init.equiv](init/equiv.hlean) and [types.equiv](types/equiv.hlean)
-- 4.3 (Bi-invertible maps): [function](function.hlean) ("biinv f" is "is_retraction f × is_section f")
+- 4.3 (Bi-invertible maps): [function](function.hlean) ("biinv f" is "is_retraction f \* is_section f")
 - 4.4 (Contractible fibers): [types.equiv](types/equiv.hlean)
-- 4.5 (On the definition of equivalences): no formalizable content
+- 4.5 (On theDefinition of equivalences): no formalizable content
 - 4.6 (Surjections and embeddings): [function](function.hlean)
 - 4.7 (Closure properties of equivalences): 4.7.1 in [init.equiv](init/equiv.hlean); 4.7.2 in [function](function.hlean); 4.7.3 and 4.7.4 in [types.arrow_2](types/arrow_2.hlean) 4.7.5 in [types.sigma](types/sigma.hlean) (sigma_functor is a generalization of total(f)); 4.7.6 in [types.fiber](types/fiber.hlean) and 4.7.7 in [types.equiv](types/equiv.hlean).
 - 4.8 (The object classifier): 4.8.1 and 4.8.2 in [types.fiber](types/fiber.hlean); 4.8.3 and 4.8.4 in [types.univ](types/univ.hlean)
@@ -106,7 +106,7 @@ Lean has support for inductive families, but not for induction-induction or indu
 - 5.3 (W-types): [types.W](types/W.hlean) defines W-types.
 - 5.4 (Inductive types are initial algebras): not formalized
 - 5.5 (Homotopy-inductive types): not formalized
-- 5.6 (The general syntax of inductive definitions): no formalizable content
+- 5.6 (The general syntax of inductiveDefinitions): no formalizable content
 - 5.7 (Generalizations of inductive types): no formalizable content.
 - 5.8 (Identity types and identity systems): 5.8.1-5.8.4 not formalized, 5.8.5 in [init.ua](init/ua.hlean) and 5.8.6 in [init.funext](init/funext.hlean)
 
@@ -127,16 +127,16 @@ We have two primitive HITs in Lean, the computation rules are manually added to 
 - 6.10 (Quotients): [hit.set_quotient](hit/set_quotient.hlean) (up to 6.10.3). We define integers differently, to make them compute, in the folder [types.int](types/int/int.md). 6.10.13 is in [types.int.hott](types/int/hott.hlean)
 - 6.11 (Algebra): [algebra.group](algebra/group.hlean), [algebra.homotopy_group](algebra/homotopy_group.hlean)
 - 6.12 (The flattening lemma): [hit.quotient](hit/quotient.hlean) (for quotients instead of homotopy coequalizers, but these are practically the same)
-- 6.13 (The general syntax of higher inductive definitions): no formalizable content
+- 6.13 (The general syntax of higher inductiveDefinitions): no formalizable content
 
 Chapter 7: Homotopy n-types
 ---------
 
 - 7.1 (Definition of n-types): [init.trunc](init/trunc.hlean), [types.trunc](types/trunc.hlean), [types.sigma](types/sigma.hlean) (Theorem 7.1.8), [types.pi](types/pi.hlean) (Theorem 7.1.9), [prop_trunc](prop_trunc.hlean) (Theorem 7.1.10)
-- 7.2 (Uniqueness of identity proofs and Hedberg’s theorem): [init.hedberg](init/hedberg.hlean) and [types.trunc](types/trunc.hlean)
+- 7.2 (Uniqueness of identity proofs and Hedberg’sDefinition): [init.hedberg](init/hedberg.hlean) and [types.trunc](types/trunc.hlean)
 - 7.3 (Truncations): [init.hit](init/hit.hlean), [hit.trunc](hit/trunc.hlean) and [types.trunc](types/trunc.hlean)
 - 7.4 (Colimits of n-types): not formalized
-- 7.5 (Connectedness): [homotopy.connectedness](homotopy/connectedness.hlean) (missing theorems: 6, 8, 9, 10, 12, 13)
+- 7.5 (Connectedness): [homotopy.connectedness](homotopy/connectedness.hlean) (missingDefinitions: 6, 8, 9, 10, 12, 13)
 - 7.6 (Orthogonal factorization): not formalized
 - 7.7 (Modalities): not formalized, and may be unformalizable in general because it's unclear how to define modalities
 
@@ -145,14 +145,14 @@ Chapter 8: Homotopy theory
 
 Every file is in the folder [homotopy](homotopy/homotopy.md)
 
-- 8.1 (π_1(S^1)): [circle](homotopy/circle.hlean) (only the encode-decode proof)
+- 8.1 (forall _1(S^1)): [circle](homotopy/circle.hlean) (only the encode-decode proof)
 - 8.2 (Connectedness of suspensions): [susp](homotopy/susp.hlean) (different proof of Theorem 8.2.1)
-- 8.3 (πk≤n of an n-connected space and π_{k<n}(S^n)): [homotopy_group](homotopy/homotopy_group.hlean)
-- 8.4 (Fiber sequences and the long exact sequence): Mostly in [homotopy.chain_complex](homotopy/chain_complex.hlean), [homotopy.LES_of_homotopy_groups](homotopy/LES_of_homotopy_groups.hlean). Definitions 8.4.1 and 8.4.2 in [types.pointed](types/pointed.hlean), Corollary 8.4.8 in [homotopy.homotopy_group](homotopy/homotopy_group.hlean).
+- 8.3 (forall k≤n of an n-connected space and forall _{k<n}(S^n)): [homotopy_group](homotopy/homotopy_group.hlean)
+- 8.4 (Fiber sequences and the long exact sequence): Mostly in [homotopy.chain_complex](homotopy/chain_complex.hlean), [homotopy.LES_of_homotopy_groups](homotopy/LES_of_homotopy_groups.hlean).Definitions 8.4.1 and 8.4.2 in [types.pointed](types/pointed.hlean), Corollary 8.4.8 in [homotopy.homotopy_group](homotopy/homotopy_group.hlean).
 - 8.5 (The Hopf fibration): [hit.pushout](hit/pushout.hlean) (Lemma 8.5.3), [hopf](homotopy/hopf.hlean) (The Hopf construction, Lemmas 8.5.5 and 8.5.7), [susp](homotopy/susp.hlean) (Definition 8.5.6), [circle](homotopy/circle.hlean) (multiplication on the circle, Lemma 8.5.8), [join](homotopy/join.hlean) (join is associative, Lemma 8.5.9), [complex_hopf](homotopy/complex_hopf.hlean) (the H-space structure on the circle and the complex Hopf fibration, i.e. Theorem 8.5.1), [sphere2](homotopy/sphere2.hlean) (Corollary 8.5.2)
-- 8.6 (The Freudenthal suspension theorem): [connectedness](homotopy/connectedness.hlean) (Lemma 8.6.1), [wedge](homotopy/wedge.hlean) (Wedge connectivity, Lemma 8.6.2). Corollary 8.6.14 is proven directly in [freudenthal](homotopy/freudenthal.hlean), however, we don't prove Theorem 8.6.4. Stability of iterated suspensions is also in [freudenthal](homotopy/freudenthal.hlean). The homotopy groups of spheres in this section are computed in [sphere2](homotopy/sphere2.hlean).
-- 8.7 (The van Kampen theorem): [vankampen](homotopy/vankampen.hlean) (the pushout of Groupoids is formalized in [algebra.category.constructions.pushout](algebra/category/constructions/pushout.hlean), including the universal property of this pushout. Some preliminary definitions for this pushout are in [algebra.graph](algebra/graph.hlean))
-- 8.8 (Whitehead’s theorem and Whitehead’s principle): 8.8.1 and 8.8.2 at the bottom of [types.trunc](types/trunc.hlean), 8.8.3-5 in [homotopy_group](homotopy/homotopy_group.hlean). Some properties of infinity-connected maps are also in [homotopy_group](homotopy/homotopy_group.hlean). Infinity-truncated types are not yet defined.
+- 8.6 (The Freudenthal suspensionDefinition): [connectedness](homotopy/connectedness.hlean) (Lemma 8.6.1), [wedge](homotopy/wedge.hlean) (Wedge connectivity, Lemma 8.6.2). Corollary 8.6.14 is proven directly in [freudenthal](homotopy/freudenthal.hlean), however, we don't prove Theorem 8.6.4. Stability of iterated suspensions is also in [freudenthal](homotopy/freudenthal.hlean). The homotopy groups of spheres in this section are computed in [sphere2](homotopy/sphere2.hlean).
+- 8.7 (The van KampenDefinition): [vankampen](homotopy/vankampen.hlean) (the pushout of Groupoids is formalized in [algebra.category.constructions.pushout](algebra/category/constructions/pushout.hlean), including the universal property of this pushout. Some preliminaryDefinitions for this pushout are in [algebra.graph](algebra/graph.hlean))
+- 8.8 (Whitehead’sDefinition and Whitehead’s principle): 8.8.1 and 8.8.2 at the bottom of [types.trunc](types/trunc.hlean), 8.8.3-5 in [homotopy_group](homotopy/homotopy_group.hlean). Some properties of infinity-connected maps are also in [homotopy_group](homotopy/homotopy_group.hlean). Infinity-truncated types are not yet defined.
 - 8.9 (A general statement of the encode-decode method): [types.eq](types/eq.hlean).
 - 8.10 (Additional Results): Theorem 8.10.3 is formalized in [homotopy.EM](homotopy/EM.hlean).
 
@@ -162,11 +162,11 @@ Chapter 9: Category theory
 Every file is in the folder [algebra.category](algebra/category/category.md)
 
 - 9.1 (Categories and precategories): [precategory](algebra/category/precategory.hlean), [iso](algebra/category/iso.hlean), [category](algebra/category/category.hlean), [groupoid](algebra/category/groupoid.hlean) (mostly)
-- 9.2 (Functors and transformations): [functor.basic](algebra/category/functor/basic.hlean), [nat_trans](algebra/category/nat_trans.hlean), [constructions.functor](algebra/category/constructions/functor.hlean)
+- 9.2 (functors and transformations): [functor.basic](algebra/category/functor/basic.hlean) => [nat_trans](algebra/category/nat_trans.hlean), [constructions.functor](algebra/category/constructions/functor.hlean)
 - 9.3 (Adjunctions): [functor.adjoint](algebra/category/functor/adjoint.hlean)
 - 9.4 (Equivalences): [functor.equivalence](algebra/category/functor/equivalence.hlean) and [functor.attributes](algebra/category/functor/attributes.hlean) (partially)
 - 9.5 (The Yoneda lemma): [constructions.opposite](algebra/category/constructions/opposite.hlean), [constructions.product](algebra/category/constructions/product.hlean), [functor.yoneda](algebra/category/functor/yoneda.hlean) (up to Theorem 9.5.9)
-- 9.6 (Strict categories): [strict](algebra/category/strict.hlean) (only definition)
+- 9.6 (Strict categories): [strict](algebra/category/strict.hlean) (onlyDefinition)
 - 9.7 (†-categories): not formalized
 - 9.8 (The structure identity principle): not formalized
 - 9.9 (The Rezk completion): [constructions.rezk](algebra/category/constructions/rezk.hlean), 9.9.1 to 9.9.4 in [constructions.functor](algebra/category/constructions/functor.hlean)

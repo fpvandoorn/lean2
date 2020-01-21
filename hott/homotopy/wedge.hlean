@@ -1,115 +1,115 @@
-/-
+(*
 Copyright (c) 2016 Jakob von Raumer. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jakob von Raumer, Ulrik Buchholtz
 
 The Wedge Sum of Two Pointed Types
--/
+*)
 import hit.pushout .connectedness types.unit
 
 open eq pushout pointed unit trunc_index
 
-definition wedge' (A B : Type*) : Type := ppushout (pconst punit A) (pconst punit B)
+Definition wedge' (A B : pType) : Type . ppushout (pconst punit A) (pconst punit B)
 local attribute wedge' [reducible]
-definition wedge [constructor] (A B : Type*) : Type* := pointed.mk' (wedge' A B)
-infixr ` ∨ ` := wedge
+Definition wedge (A B : pType) : pType . pointed.mk' (wedge' A B)
+infixr ` ∨ ` . wedge
 
 namespace wedge
 
-  protected definition glue {A B : Type*} : inl pt = inr pt :> wedge A B :=
+  protectedDefinition glue {A B : pType} : inl (point _) = inr (point _) :> wedge A B.
   pushout.glue ⋆
 
-  protected definition rec {A B : Type*} {P : wedge A B → Type} (Pinl : Π(x : A), P (inl x))
-    (Pinr : Π(x : B), P (inr x)) (Pglue : pathover P (Pinl pt) wedge.glue (Pinr pt))
-    (y : wedge' A B) : P y :=
+  protectedDefinition rec {A B : pType} {P : wedge A B -> Type} (Pinl : forall (x : A), P (inl x))
+    (Pinr : forall (x : B), P (inr x)) (Pglue : pathover P (Pinl (point _)) wedge.glue (Pinr (point _)))
+    (y : wedge' A B) : P y.
   by induction y; apply Pinl; apply Pinr; induction x; exact Pglue
 
-  protected definition elim {A B : Type*} {P : Type} (Pinl : A → P)
-    (Pinr : B → P) (Pglue : Pinl pt = Pinr pt) (y : wedge' A B) : P :=
+  protectedDefinition elim {A B : pType} {P : Type} (Pinl : A -> P)
+    (Pinr : B -> P) (Pglue : Pinl (point _) = Pinr (point _)) (y : wedge' A B) : P.
   by induction y with a b x; exact Pinl a; exact Pinr b; induction x; exact Pglue
 
-  protected definition rec_glue {A B : Type*} {P : wedge A B → Type} (Pinl : Π(x : A), P (inl x))
-    (Pinr : Π(x : B), P (inr x)) (Pglue : pathover P (Pinl pt) wedge.glue (Pinr pt)) :
-    apd (wedge.rec Pinl Pinr Pglue) wedge.glue = Pglue :=
+  protectedDefinition rec_glue {A B : pType} {P : wedge A B -> Type} (Pinl : forall (x : A), P (inl x))
+    (Pinr : forall (x : B), P (inr x)) (Pglue : pathover P (Pinl (point _)) wedge.glue (Pinr (point _))) :
+    apd (wedge.rec Pinl Pinr Pglue) wedge.glue = Pglue.
   !pushout.rec_glue
 
-  protected definition elim_glue {A B : Type*} {P : Type} (Pinl : A → P) (Pinr : B → P)
-    (Pglue : Pinl pt = Pinr pt) : ap (wedge.elim Pinl Pinr Pglue) wedge.glue = Pglue :=
+  protectedDefinition elim_glue {A B : pType} {P : Type} (Pinl : A -> P) (Pinr : B -> P)
+    (Pglue : Pinl (point _) = Pinr (point _)) : ap (wedge.elim Pinl Pinr Pglue) wedge.glue = Pglue.
   !pushout.elim_glue
 
-end wedge
+Defined. wedge
 
-attribute wedge.rec wedge.elim [recursor 7] [unfold 7]
+
 
 namespace wedge
 
-  -- TODO maybe find a cleaner proof
-  protected definition unit (A : Type*) : A ≃* wedge punit A :=
-  begin
+  (* TODO maybe find a cleaner proof *)
+  protectedDefinition unit (A : pType) : A <~>* wedge punit A.
+Proof.
     fapply pequiv_of_pmap,
-    { fapply pmap.mk, intro a, apply pinr a, apply respect_pt },
+    { fapply Build_pMap, intro a, apply pinr a, apply point_eq },
     { fapply is_equiv.adjointify, intro x, fapply pushout.elim_on x,
-      exact λ x, Point A, exact id, intro u, reflexivity,
-      intro x, fapply pushout.rec_on x, intro u, cases u, esimp, apply wedge.glue⁻¹,
+      exact fun x => Point A, exact id, intro u, reflexivity,
+      intro x, fapply pushout.rec_on x, intro u, cases u, esimp, apply wedge.glue^-1,
       intro a, reflexivity,
       intro u, cases u, esimp, apply eq_pathover,
-      refine _ ⬝hp !ap_id⁻¹, fapply eq_hconcat, apply ap_compose inr,
+      refine _ @hp !ap_id^-1, fapply eq_hconcat, apply ap_compose inr,
       krewrite elim_glue, fapply eq_hconcat, apply ap_idp, apply square_of_eq,
       apply con.left_inv,
       intro a, reflexivity},
-  end
-end wedge
+Defined.
+Defined. wedge
 
 open trunc is_trunc is_conn function
 
 namespace wedge_extension
 section
-  -- The wedge connectivity lemma (Lemma 8.6.2)
-  parameters {A B : Type*} (n m : ℕ)
+  (* The wedge connectivity lemma (Lemma 8.6.2) *)
+  parameters {A B : pType} (n m : ℕ)
              [cA : is_conn n A] [cB : is_conn m B]
-             (P : A → B → Type) [HP : Πa b, is_trunc (m + n) (P a b)]
-             (f : Πa : A, P a pt)
-             (g : Πb : B, P pt b)
-             (p : f pt = g pt)
+             (P : A -> B -> Type) [HP : forall a b, is_trunc (m + n) (P a b)]
+             (f : forall a : A, P a (point _))
+             (g : forall b : B, P (point _) b)
+             (p : f (point _) = g (point _))
 
   include cA cB HP
-  private definition Q (a : A) : Type :=
-  fiber (λs : (Πb : B, P a b), s (Point B)) (f a)
+  privateDefinition Q (a : A) : Type.
+  fiber (fun s : (forall , P a b), s (Point B)) (f a)
 
-  private definition is_trunc_Q (a : A) : is_trunc (n.-1) (Q a) :=
-  begin
+  privateDefinition is_trunc_Q (a : A) : is_trunc (n.-1) (Q a).
+Proof.
     refine @is_conn.elim_general (m.-1) _ _ _ (P a) _ (f a),
     rewrite [-succ_add_succ, of_nat_add_of_nat], intro b, apply HP
-  end
+Defined.
 
   local attribute is_trunc_Q [instance]
-  private definition Q_sec : Πa : A, Q a :=
-  is_conn.elim (n.-1) Q (fiber.mk g p⁻¹)
+  privateDefinition Q_sec : forall a : A, Q a.
+  is_conn.elim (n.-1) Q (fiber.mk g p^-1)
 
-  protected definition ext : Π(a : A)(b : B), P a b :=
-  λa, fiber.point (Q_sec a)
+  protectedDefinition ext : forall (a : A)(b : B), P a b.
+  fun a => fiber.point (Q_sec a)
 
-  protected definition β_left (a : A) : ext a (Point B) = f a :=
+  protectedDefinition β_left (a : A) : ext a (Point B) = f a.
   fiber.point_eq (Q_sec a)
 
-  private definition coh_aux : Σq : ext (Point A) = g,
-    β_left (Point A) = ap (λs : (Πb : B, P (Point A) b), s (Point B)) q ⬝ p⁻¹ :=
-  equiv.to_fun (fiber.fiber_eq_equiv (Q_sec (Point A)) (fiber.mk g p⁻¹))
-               (is_conn.elim_β (n.-1) Q (fiber.mk g p⁻¹))
+  privateDefinition coh_aux : Σq : ext (Point A) = g,
+    β_left (Point A) = ap (fun s : (forall , P (Point A) b), s (Point B)) q @ p^-1.
+  equiv.to_fun (fiber.fiber_eq_equiv (Q_sec (Point A)) (fiber.mk g p^-1))
+               (is_conn.elim_β (n.-1) Q (fiber.mk g p^-1))
 
-  protected definition β_right (b : B) : ext (Point A) b = g b :=
+  protectedDefinition β_right (b : B) : ext (Point A) b = g b.
   apd10 (sigma.pr1 coh_aux) b
 
-  private definition lem : β_left (Point A) = β_right (Point B) ⬝ p⁻¹ :=
-  begin
+  privateDefinition lem : β_left (Point A) = β_right (Point B) @ p^-1.
+Proof.
     unfold β_right, unfold β_left,
     krewrite (apd10_eq_ap_eval (sigma.pr1 coh_aux) (Point B)),
     exact sigma.pr2 coh_aux,
-  end
+Defined.
 
-  protected definition coh
-    : (β_left (Point A))⁻¹ ⬝ β_right (Point B) = p :=
+  protectedDefinition coh
+    : (β_left (Point A))^-1 @ β_right (Point B) = p.
   by rewrite [lem,con_inv,inv_inv,con.assoc,con.left_inv]
 
-end
-end wedge_extension
+Defined.
+Defined. wedge_extension

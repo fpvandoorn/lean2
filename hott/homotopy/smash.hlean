@@ -1,14 +1,14 @@
-/-
+(*
 Copyright (c) 2016 Jakob von Raumer. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jakob von Raumer, Floris van Doorn
 
 The Smash Product of Types.
 
-One definition is the cofiber of the map
-    wedge A B → A × B
-However, we define it (equivalently) as the pushout of the maps A + B → 2 and A + B → A × B.
--/
+OneDefinition is the cofiber of the map
+    wedge A B -> A \* B
+However, we define it (equivalently) as the pushout of the maps A + B -> 2 and A + B -> A \* B.
+*)
 
 import homotopy.circle homotopy.join types.pointed homotopy.cofiber homotopy.wedge
 
@@ -16,156 +16,156 @@ open bool pointed eq equiv is_equiv sum bool prod unit circle cofiber prod.ops w
 
 namespace smash
 
-  variables {A B : Type*}
+  variables {A B : pType}
 
   section
   open pushout
 
-  definition prod_of_sum [unfold 3] (u : A + B) : A × B :=
-  by induction u with a b; exact (a, pt); exact (pt, b)
+Definition prod_of_sum (u : A + B) : A \* B.
+  by induction u with a b; exact (a, (point _)); exact ((point _), b)
 
-  definition bool_of_sum [unfold 3] (u : A + B) : bool :=
+Definition bool_of_sum (u : A + B) : bool.
   by induction u; exact ff; exact tt
 
-  definition smash' (A B : Type*) : Type := pushout (@prod_of_sum A B) (@bool_of_sum A B)
-  protected definition mk' (a : A) (b : B) : smash' A B := inl (a, b)
+Definition smash' (A B : pType) : Type . pushout (@prod_of_sum A B) (@bool_of_sum A B)
+  protectedDefinition mk' (a : A) (b : B) : smash' A B . inl (a, b)
 
-  definition pointed_smash' [instance] [constructor] (A B : Type*) : pointed (smash' A B) :=
-  pointed.mk (smash.mk' pt pt)
-  definition smash [constructor] (A B : Type*) : Type* :=
+Definition pointed_smash' [instance] (A B : pType) : pointed (smash' A B).
+  pointed.mk (smash.mk' (point _) pt)
+Definition smash (A B : pType) : pType.
   pointed.mk' (smash' A B)
 
-  infixr ` ∧ ` := smash
+  infixr ` ∧ ` . smash
 
-  protected definition mk (a : A) (b : B) : A ∧ B := inl (a, b)
-  definition auxl : smash A B := inr ff
-  definition auxr : smash A B := inr tt
-  definition gluel (a : A) : smash.mk a pt = auxl :> smash A B := glue (inl a)
-  definition gluer (b : B) : smash.mk pt b = auxr :> smash A B := glue (inr b)
+  protectedDefinition mk (a : A) (b : B) : A ∧ B . inl (a, b)
+Definition auxl : smash A B . inr ff
+Definition auxr : smash A B . inr tt
+Definition gluel (a : A) : smash.mk a (point _) = auxl :> smash A B . glue (inl a)
+Definition gluer (b : B) : smash.mk (point _) b = auxr :> smash A B . glue (inr b)
 
-  end
+Defined.
 
-  definition gluel' (a a' : A) : smash.mk a pt = smash.mk a' pt :> smash A B :=
-  gluel a ⬝ (gluel a')⁻¹
-  definition gluer' (b b' : B) : smash.mk pt b = smash.mk pt b' :> smash A B :=
-  gluer b ⬝ (gluer b')⁻¹
-  definition glue (a : A) (b : B) : smash.mk a pt = smash.mk pt b :=
-  gluel' a pt ⬝ gluer' pt b
+Definition gluel' (a a' : A) : smash.mk a (point _) = smash.mk a' (point _) :> smash A B.
+  gluel a @ (gluel a')^-1
+Definition gluer' (b b' : B) : smash.mk (point _) b = smash.mk (point _) b' :> smash A B.
+  gluer b @ (gluer b')^-1
+Definition glue (a : A) (b : B) : smash.mk a (point _) = smash.mk (point _) b.
+  gluel' a (point _) @ gluer' (point _) b
 
-  definition glue_pt_left (b : B) : glue (Point A) b = gluer' pt b :=
-  whisker_right _ !con.right_inv ⬝ !idp_con
+Definition glue_pt_left (b : B) : glue (Point A) b = gluer' (point _) b.
+  whisker_right _ (con_pV _) @ (concat_1p _)
 
-  definition glue_pt_right (a : A) : glue a (Point B) = gluel' a pt :=
-  proof whisker_left _ !con.right_inv qed
+Definition glue_pt_right (a : A) : glue a (Point B) = gluel' a (point _).
+  proof whisker_left _ (con_pV _) qed
 
-  definition ap_mk_left {a a' : A} (p : a = a') : ap (λa, smash.mk a (Point B)) p = gluel' a a' :=
+Definition ap_mk_left {a a' : A} (p : a = a') : ap (fun a => smash.mk a (Point B)) p = gluel' a a'.
   !ap_is_constant
 
-  definition ap_mk_right {b b' : B} (p : b = b') : ap (smash.mk (Point A)) p = gluer' b b' :=
+Definition ap_mk_right {b b' : B} (p : b = b') : ap (smash.mk (Point A)) p = gluer' b b'.
   !ap_is_constant
 
-  protected definition rec {P : smash A B → Type} (Pmk : Πa b, P (smash.mk a b))
-    (Pl : P auxl) (Pr : P auxr) (Pgl : Πa, Pmk a pt =[gluel a] Pl)
-    (Pgr : Πb, Pmk pt b =[gluer b] Pr) (x : smash' A B) : P x :=
-  begin
+  protectedDefinition rec {P : smash A B -> Type} (Pmk : forall a b, P (smash.mk a b))
+    (Pl : P auxl) (Pr : P auxr) (Pgl : forall a, Pmk a (point _) =[gluel a] Pl)
+    (Pgr : forall b, Pmk (point _) b =[gluer b] Pr) (x : smash' A B) : P x.
+Proof.
     induction x with x b u,
     { induction x with a b, exact Pmk a b },
     { induction b, exact Pl, exact Pr },
     { induction u: esimp,
       { apply Pgl },
       { apply Pgr }}
-  end
+Defined.
 
-  theorem rec_gluel {P : smash A B → Type} {Pmk : Πa b, P (smash.mk a b)}
-    {Pl : P auxl} {Pr : P auxr} (Pgl : Πa, Pmk a pt =[gluel a] Pl)
-    (Pgr : Πb, Pmk pt b =[gluer b] Pr) (a : A) :
-    apd (smash.rec Pmk Pl Pr Pgl Pgr) (gluel a) = Pgl a :=
+Definition rec_gluel {P : smash A B -> Type} {Pmk : forall a b, P (smash.mk a b)}
+    {Pl : P auxl} {Pr : P auxr} (Pgl : forall a, Pmk a (point _) =[gluel a] Pl)
+    (Pgr : forall b, Pmk (point _) b =[gluer b] Pr) (a : A) :
+    apd (smash.rec Pmk Pl Pr Pgl Pgr) (gluel a) = Pgl a.
   !pushout.rec_glue
 
-  theorem rec_gluer {P : smash A B → Type} {Pmk : Πa b, P (smash.mk a b)}
-    {Pl : P auxl} {Pr : P auxr} (Pgl : Πa, Pmk a pt =[gluel a] Pl)
-    (Pgr : Πb, Pmk pt b =[gluer b] Pr) (b : B) :
-    apd (smash.rec Pmk Pl Pr Pgl Pgr) (gluer b) = Pgr b :=
+Definition rec_gluer {P : smash A B -> Type} {Pmk : forall a b, P (smash.mk a b)}
+    {Pl : P auxl} {Pr : P auxr} (Pgl : forall a, Pmk a (point _) =[gluel a] Pl)
+    (Pgr : forall b, Pmk (point _) b =[gluer b] Pr) (b : B) :
+    apd (smash.rec Pmk Pl Pr Pgl Pgr) (gluer b) = Pgr b.
   !pushout.rec_glue
 
-  theorem rec_glue {P : smash A B → Type} {Pmk : Πa b, P (smash.mk a b)}
-    {Pl : P auxl} {Pr : P auxr} (Pgl : Πa, Pmk a pt =[gluel a] Pl)
-    (Pgr : Πb, Pmk pt b =[gluer b] Pr) (a : A) (b : B) :
+Definition rec_glue {P : smash A B -> Type} {Pmk : forall a b, P (smash.mk a b)}
+    {Pl : P auxl} {Pr : P auxr} (Pgl : forall a, Pmk a (point _) =[gluel a] Pl)
+    (Pgr : forall b, Pmk (point _) b =[gluer b] Pr) (a : A) (b : B) :
     apd (smash.rec Pmk Pl Pr Pgl Pgr) (glue a b) =
-      (Pgl a ⬝o (Pgl pt)⁻¹ᵒ) ⬝o (Pgr pt ⬝o (Pgr b)⁻¹ᵒ) :=
+      (Pgl a @o (Pgl (point _))^-1ᵒ) @o (Pgr (point _) @o (Pgr b)^-1ᵒ).
   by rewrite [↑glue, ↑gluel', ↑gluer', +apd_con, +apd_inv, +rec_gluel, +rec_gluer]
 
-  protected definition elim {P : Type} (Pmk : Πa b, P) (Pl Pr : P)
-    (Pgl : Πa : A, Pmk a pt = Pl) (Pgr : Πb : B, Pmk pt b = Pr) (x : smash' A B) : P :=
-  smash.rec Pmk Pl Pr (λa, pathover_of_eq _ (Pgl a)) (λb, pathover_of_eq _ (Pgr b)) x
+  protectedDefinition elim {P : Type} (Pmk : forall a b, P) (Pl Pr : P)
+    (Pgl : forall a : A, Pmk a (point _) = Pl) (Pgr : forall b : B, Pmk (point _) b = Pr) (x : smash' A B) : P.
+  smash.rec Pmk Pl Pr (fun a => pathover_of_eq _ (Pgl a)) (fun b => pathover_of_eq _ (Pgr b)) x
 
-  -- an elim where you are forced to make (Pgl pt) and (Pgl pt) to be reflexivity
-  protected definition elim' [reducible] {P : Type} (Pmk : Πa b, P)
-    (Pgl : Πa : A, Pmk a pt = Pmk pt pt) (Pgr : Πb : B, Pmk pt b = Pmk pt pt)
-    (ql : Pgl pt = idp) (qr : Pgr pt = idp) (x : smash' A B) : P :=
-  smash.elim Pmk (Pmk pt pt) (Pmk pt pt) Pgl Pgr x
+  (* an elim where you are forced to make (Pgl (point _)) and (Pgl (point _)) to be reflexivity *)
+  protectedDefinition elim' {P : Type} (Pmk : forall a b, P)
+    (Pgl : forall a : A, Pmk a (point _) = Pmk (point _) pt) (Pgr : forall b : B, Pmk (point _) b = Pmk (point _) pt)
+    (ql : Pgl (point _) = idp) (qr : Pgr (point _) = idp) (x : smash' A B) : P.
+  smash.elim Pmk (Pmk (point _) pt) (Pmk (point _) pt) Pgl Pgr x
 
-  theorem elim_gluel {P : Type} {Pmk : Πa b, P} {Pl Pr : P}
-    (Pgl : Πa : A, Pmk a pt = Pl) (Pgr : Πb : B, Pmk pt b = Pr) (a : A) :
-    ap (smash.elim Pmk Pl Pr Pgl Pgr) (gluel a) = Pgl a :=
-  begin
+Definition elim_gluel {P : Type} {Pmk : forall a b, P} {Pl Pr : P}
+    (Pgl : forall a : A, Pmk a (point _) = Pl) (Pgr : forall b : B, Pmk (point _) b = Pr) (a : A) :
+    ap (smash.elim Pmk Pl Pr Pgl Pgr) (gluel a) = Pgl a.
+Proof.
     apply eq_of_fn_eq_fn_inv !(pathover_constant (@gluel A B a)),
     rewrite [▸*,-apd_eq_pathover_of_eq_ap,↑smash.elim,rec_gluel],
-  end
+Defined.
 
-  theorem elim_gluer {P : Type} {Pmk : Πa b, P} {Pl Pr : P}
-    (Pgl : Πa : A, Pmk a pt = Pl) (Pgr : Πb : B, Pmk pt b = Pr) (b : B) :
-    ap (smash.elim Pmk Pl Pr Pgl Pgr) (gluer b) = Pgr b :=
-  begin
+Definition elim_gluer {P : Type} {Pmk : forall a b, P} {Pl Pr : P}
+    (Pgl : forall a : A, Pmk a (point _) = Pl) (Pgr : forall b : B, Pmk (point _) b = Pr) (b : B) :
+    ap (smash.elim Pmk Pl Pr Pgl Pgr) (gluer b) = Pgr b.
+Proof.
     apply eq_of_fn_eq_fn_inv !(pathover_constant (@gluer A B b)),
     rewrite [▸*,-apd_eq_pathover_of_eq_ap,↑smash.elim,rec_gluer],
-  end
+Defined.
 
-  theorem elim_glue {P : Type} {Pmk : Πa b, P} {Pl Pr : P}
-    (Pgl : Πa : A, Pmk a pt = Pl) (Pgr : Πb : B, Pmk pt b = Pr) (a : A) (b : B) :
-    ap (smash.elim Pmk Pl Pr Pgl Pgr) (glue a b) = (Pgl a ⬝ (Pgl pt)⁻¹) ⬝ (Pgr pt ⬝ (Pgr b)⁻¹) :=
+Definition elim_glue {P : Type} {Pmk : forall a b, P} {Pl Pr : P}
+    (Pgl : forall a : A, Pmk a (point _) = Pl) (Pgr : forall b : B, Pmk (point _) b = Pr) (a : A) (b : B) :
+    ap (smash.elim Pmk Pl Pr Pgl Pgr) (glue a b) = (Pgl a @ (Pgl (point _))^-1) @ (Pgr (point _) @ (Pgr b)^-1).
   by rewrite [↑glue, ↑gluel', ↑gluer', +ap_con, +ap_inv, +elim_gluel, +elim_gluer]
 
-end smash
+Defined. smash
 open smash
-attribute smash.mk smash.mk' auxl auxr [constructor]
-attribute smash.elim' smash.rec smash.elim [unfold 9] [recursor 9]
+
+
 
 namespace smash
 
-  variables {A B : Type*}
+  variables {A B : pType}
 
-  definition of_smash_pbool [unfold 2] (x : smash A pbool) : A :=
-  begin
+Definition of_smash_pbool (x : smash A pbool) : A.
+Proof.
     induction x,
-    { induction b, exact pt, exact a },
-    { exact pt },
-    { exact pt },
+    { induction b, exact (point _), exact a },
+    { exact (point _) },
+    { exact (point _) },
     { reflexivity },
     { induction b: reflexivity }
-  end
+Defined.
 
-  definition smash_pbool_pequiv [constructor] (A : Type*) : smash A pbool ≃* A :=
-  begin
+Definition smash_pbool_pequiv (A : pType) : smash A pbool <~>* A.
+Proof.
     fapply pequiv_of_equiv,
     { fapply equiv.MK,
       { exact of_smash_pbool },
       { intro a, exact smash.mk a tt },
       { intro a, reflexivity },
       { exact abstract begin intro x, induction x,
-        { induction b, exact gluer' tt pt ⬝ gluel' pt a, reflexivity },
-        { exact gluer' tt ff ⬝ gluel pt, },
+        { induction b, exact gluer' tt (point _) @ gluel' (point _) a, reflexivity },
+        { exact gluer' tt ff @ gluel (point _), },
         { exact gluer tt, },
         { apply eq_pathover_id_right,
-          refine ap_compose (λa, smash.mk a tt) _ _ ⬝ ap02 _ !elim_gluel ⬝ph _,
-          apply square_of_eq_top, refine !con.assoc⁻¹ ⬝ whisker_right _ !idp_con⁻¹ },
+          refine ap_compose (fun a => smash.mk a tt) _ _ @ ap02 _ !elim_gluel @ph _,
+          apply square_of_eq_top, refine (concat_pp_p _ _ _)^-1 @ whisker_right _ (concat_1p _)^-1 },
         { apply eq_pathover_id_right,
-          refine ap_compose (λa, smash.mk a tt) _ _ ⬝ ap02 _ !elim_gluer ⬝ph _,
+          refine ap_compose (fun a => smash.mk a tt) _ _ @ ap02 _ !elim_gluer @ph _,
           induction b: esimp,
           { apply square_of_eq_top,
-            refine whisker_left _ !con.right_inv ⬝ !con_idp ⬝ whisker_right _ !idp_con⁻¹ },
+            refine whisker_left _ (con_pV _) @ (concat_p1 _) @ whisker_right _ (concat_1p _)^-1 },
           { apply square_of_eq idp }} end end }},
     { reflexivity }
-  end
+Defined.
 
-end smash
+Defined. smash

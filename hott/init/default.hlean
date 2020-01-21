@@ -1,8 +1,8 @@
-/-
+(*
 Copyright (c) 2014 Microsoft Corporation. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Leonardo de Moura, Jakob von Raumer, Floris van Doorn
--/
+*)
 
 prelude
 import init.datatypes init.reserved_notation init.tactic init.logic
@@ -24,4 +24,4 @@ namespace core
   export equiv (to_inv to_right_inv to_left_inv)
   export is_equiv (inv right_inv left_inv adjointify)
   export [abbreviation] is_trunc
-end core
+Defined. core

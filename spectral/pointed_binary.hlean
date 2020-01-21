@@ -2,7 +2,7 @@
 Copyright (c) 2018 Ulrik Buchholtz. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Floris van Doorn
--/
+*)
 
 import .pointed_pi
 
@@ -11,248 +11,245 @@ open eq pointed equiv sigma is_equiv trunc option pi function fiber sigma.ops
 namespace pointed
 
 section bpmap
-(* binary pointed maps -/
-structure bpmap (A B C : Type*) : Type :=
-  (f : A → B →* C)
-  (q : Πb, f pt b = pt)
-  (r : q pt = respect_pt (f pt))
+(* binary pointed maps *)
+structure bpmap (A B C : pType) : Type.
+  (f : A -> B ->* C)
+  (q : forall b, f (point _) b = (point _))
+  (r : q (point _) = point_eq (f (point _)))
 
-attribute [coercion] bpmap.f
-variables {A B C D A' B' C' : Type*} {f f' : bpmap A B C}
-definition respect_pt1 [unfold 4] (f : bpmap A B C) (b : B) : f pt b = pt :=
+
+variables {A B C D A' B' C' : pType} {f f' : bpmap A B C}
+Definition point_eq1 (f : bpmap A B C) (b : B) : f (point _) b = (point _).
 bpmap.q f b
 
-definition respect_pt2 [unfold 4] (f : bpmap A B C) (a : A) : f a pt = pt :=
-respect_pt (f a)
+Definition point_eq2 (f : bpmap A B C) (a : A) : f a (point _) = (point _).
+point_eq (f a)
 
-definition respect_ptpt [unfold 4] (f : bpmap A B C) : respect_pt1 f pt = respect_pt2 f pt :=
+Definition point_eqpt (f : bpmap A B C) : point_eq1 f (point _) = point_eq2 f (point _).
 bpmap.r f
 
-definition bpconst [constructor] (A B C : Type*) : bpmap A B C :=
-bpmap.mk (λa, pconst B C) (λb, idp) idp
+Definition bpconst (A B C : pType) : bpmap A B C.
+bBuild_pMap (fun a => pconst B C) (fun b => idp) idp
 
-definition bppmap [constructor] (A B C : Type*) : Type* :=
+Definition bppMap (A B C : pType) : pType.
 pointed.MK (bpmap A B C) (bpconst A B C)
 
-definition pmap_of_bpmap [constructor] (f : bppmap A B C) : ppmap A (ppmap B C) :=
-begin
-  fapply pmap.mk,
-  { intro a, exact pmap.mk (f a) (respect_pt2 f a) },
-  { exact eq_of_phomotopy (phomotopy.mk (respect_pt1 f) (respect_ptpt f)) }
-end
+Definition pmap_of_bpmap (f : bppMap A B C) : ppMap A (ppMap B C).
+Proof.
+  fapply Build_pMap,
+  { intro a, exact Build_pMap (f a) (point_eq2 f a) },
+  { exact path_pforall (Build_pHomotopy (point_eq1 f) (point_eqpt f)) }
+Defined.
 
-definition bpmap_of_pmap [constructor] (f : ppmap A (ppmap B C)) : bppmap A B C :=
-begin
-  apply bpmap.mk (λa, f a) (ap010 pmap.to_fun (respect_pt f)),
-  exact respect_pt (phomotopy_of_eq (respect_pt f))
-end
+Definition bpmap_of_pmap (f : ppMap A (ppMap B C)) : bppMap A B C.
+Proof.
+  apply bBuild_pMap (fun a => f a) (ap010 pmap.to_fun (point_eq f)) =>
+  exact point_eq (phomotopy_path (point_eq f))
+Defined.
 
-protected definition bpmap.sigma_char [constructor] (A B C : Type*) :
-  bpmap A B C ≃ Σ(f : A → B →* C) (q : Πb, f pt b = pt), q pt = respect_pt (f pt) :=
-begin
+protectedDefinition bpmap.sigma_char (A B C : pType) :
+  bpmap A B C <~> Σ(f : A -> B ->* C) (q : forall b, f (point _) b = (point _)), q (point _) = point_eq (f (point _)).
+Proof.
   fapply equiv.MK,
-  { intro f, exact ⟨f, respect_pt1 f, respect_ptpt f⟩ },
-  { intro fqr, exact bpmap.mk fqr.1 fqr.2.1 fqr.2.2 },
+  { intro f, exact ⟨f, point_eq1 f, point_eqpt f⟩ },
+  { intro fqr, exact bBuild_pMap fqr.1 fqr.2.1 fqr.2.2 },
   { intro fqr, induction fqr with f qr, induction qr with q r, reflexivity },
   { intro f, induction f, reflexivity }
-end
+Defined.
 
-definition to_homotopy_pt_square {f g : A →* B} (h : f ~* g) :
-  square (respect_pt f) (respect_pt g) (h pt) idp :=
-square_of_eq (to_homotopy_pt h)⁻¹
+Definition point_htpy_square {f g : A ->* B} (h : f ==* g) :
+  square (point_eq f) (point_eq g) (h (point _)) idp.
+square_of_eq (point_htpy h)^-1
 
-definition bpmap_eq_equiv [constructor] (f f' : bpmap A B C):
-  f = f' ≃ Σ(h : Πa, f a ~* f' a) (q : Πb, square (respect_pt1 f b) (respect_pt1 f' b) (h pt b) idp), cube (vdeg_square (respect_ptpt f)) (vdeg_square (respect_ptpt f'))
-       vrfl ids
-       (q pt) (to_homotopy_pt_square (h pt)) :=
-begin
-  refine eq_equiv_fn_eq (bpmap.sigma_char A B C) f f' ⬝e _,
-  refine !sigma_eq_equiv ⬝e _, esimp,
-  refine sigma_equiv_sigma (!eq_equiv_homotopy ⬝e pi_equiv_pi_right (λa, !pmap_eq_equiv)) _,
+Definition bpmap_eq_equiv (f f' : bpmap A B C):
+  f = f' <~> Σ(h : forall a, f a ==* f' a) (q : forall b, square (point_eq1 f b) (point_eq1 f' b) (h (point _) b) idp), cube (vdeg_square (point_eqpt f)) (vdeg_square (point_eqpt f'))
+  vrfl ids
+  (q (point _)) (point_htpy_square (h (point _))).
+Proof.
+  refine eq_equiv_fn_eq (bpmap.sigma_char A B C) f f' @e _,
+  refine !sigma_eq_equiv @e _, esimp,
+  refine sigma_equiv_sigma (!eq_equiv_homotopy @e pi_equiv_pi_right (fun a => !pmap_eq_equiv)) _,
   intro h, exact sorry
-end
+Defined.
 
-definition bpmap_eq [constructor] (h : Πa, f a ~* f' a)
-  (q : Πb, square (respect_pt1 f b) (respect_pt1 f' b) (h pt b) idp)
-  (r : cube (vdeg_square (respect_ptpt f)) (vdeg_square (respect_ptpt f'))
-       vrfl ids
-       (q pt) (to_homotopy_pt_square (h pt))) : f = f' :=
-(bpmap_eq_equiv f f')⁻¹ᵉ ⟨h, q, r⟩
+Definition bpmap_eq (h : forall a, f a ==* f' a)
+  (q : forall b, square (point_eq1 f b) (point_eq1 f' b) (h (point _) b) idp)
+  (r : cube (vdeg_square (point_eqpt f)) (vdeg_square (point_eqpt f'))
+  vrfl ids
+  (q (point _)) (point_htpy_square (h (point _)))) : f = f'.
+(bpmap_eq_equiv f f')^-1ᵉ ⟨h, q, r⟩
 
-definition pmap_equiv_bpmap [constructor] (A B C : Type*) : pmap A (ppmap B C) ≃ bpmap A B C :=
-begin
-  refine !pmap.sigma_char ⬝e _ ⬝e !bpmap.sigma_char⁻¹ᵉ,
-  refine sigma_equiv_sigma_right (λf, pmap_eq_equiv (f pt) !pconst) ⬝e _,
-  refine sigma_equiv_sigma_right (λf, !phomotopy.sigma_char)
-end
+Definition pmap_equiv_bpmap (A B C : pType) : pmap A (ppMap B C) <~> bpmap A B C.
+Proof.
+  refine !pmap.sigma_char @e _ @e !bpmap.sigma_char^-1ᵉ,
+  refine sigma_equiv_sigma_right (fun f => pmap_eq_equiv (f (point _)) !pconst) @e _,
+  refine sigma_equiv_sigma_right (fun f => !phomotopy.sigma_char)
+Defined.
 
-definition pmap_equiv_bpmap' [constructor] (A B C : Type*) : pmap A (ppmap B C) ≃ bpmap A B C :=
-begin
-  refine equiv_change_fun (pmap_equiv_bpmap A B C) _,
+Definition pmap_equiv_bpmap' (A B C : pType) : pmap A (ppMap B C) <~> bpmap A B C.
+Proof.
+  refine equiv_change_fun (pmap_equiv_bpmap A B C) _ =>
   exact bpmap_of_pmap, intro f, reflexivity
-end
+Defined.
 
-definition ppmap_pequiv_bppmap [constructor] (A B C : Type*) :
-  ppmap A (ppmap B C) ≃* bppmap A B C :=
+Definition ppMap_pequiv_bppMap (A B C : pType) :
+  ppMap A (ppMap B C) <~>* bppMap A B C.
 pequiv_of_equiv (pmap_equiv_bpmap' A B C) idp
 
-definition bpmap_functor [constructor] (f : A' →* A) (g : B' →* B) (h : C →* C')
-  (k : bpmap A B C) : bpmap A' B' C' :=
-begin
-  fapply bpmap.mk (λa', h ∘* k (f a') ∘* g),
-  { intro b', refine ap h _ ⬝ respect_pt h,
-    exact ap010 (λa b, k a b) (respect_pt f) (g b') ⬝ respect_pt1 k (g b') },
+Definition bpmap_functor (f : A' ->* A) (g : B' ->* B) (h : C ->* C')
+  (k : bpmap A B C) : bpmap A' B' C'.
+Proof.
+  fapply bBuild_pMap (fun a' => h o* k (f a') o* g),
+  { intro b', refine ap h _ @ point_eq h,
+  exact ap010 (fun a b => k a b) (point_eq f) (g b') @ point_eq1 k (g b') },
   { apply whisker_right, apply ap02 h, esimp,
-    induction A with A a₀, induction B with B b₀, induction f with f f₀, induction g with g g₀,
-    esimp at *, induction f₀, induction g₀, esimp, apply whisker_left, exact respect_ptpt k },
-end
+  induction A with A a₀, induction B with B b₀, induction f with f f₀, induction g with g g₀,
+  esimp at *, induction f₀, induction g₀, esimp, apply whisker_left, exact point_eqpt k },
+Defined.
 
-definition bppmap_functor [constructor] (f : A' →* A) (g : B' →* B) (h : C →* C') :
-  bppmap A B C →* bppmap A' B' C' :=
-begin
-  apply pmap.mk (bpmap_functor f g h),
+Definition bppMap_functor (f : A' ->* A) (g : B' ->* B) (h : C ->* C') :
+  bppMap A B C ->* bppMap A' B' C'.
+Proof.
+  apply Build_pMap (bpmap_functor f g h) =>
   induction A with A a₀, induction B with B b₀, induction C' with C' c₀',
   induction f with f f₀, induction g with g g₀, induction h with h h₀, esimp at *,
   induction f₀, induction g₀, induction h₀,
   reflexivity
-end
+Defined.
 
-  definition ppcompose_left' [constructor] (g : B →* C) : ppmap A B →* ppmap A C :=
-  pmap.mk (pcompose g)
-    begin induction C with C c₀, induction g with g g₀, esimp at *, induction g₀, reflexivity end
+Definition ppcompose_left' (g : B ->* C) : ppMap A B ->* ppMap A C.
+  Build_pMap (pcompose g)
+Proof. induction C with C c₀, induction g with g g₀, esimp at *, induction g₀, reflexivity end
 
-  definition ppcompose_right' [constructor] (f : A →* B) : ppmap B C →* ppmap A C :=
-  pmap.mk (λg, g ∘* f)
-    begin induction B with B b₀, induction f with f f₀, esimp at *, induction f₀, reflexivity end
+Definition ppcompose_right' (f : A ->* B) : ppMap B C ->* ppMap A C.
+  Build_pMap (fun g => g o* f)
+Proof. induction B with B b₀, induction f with f f₀, esimp at *, induction f₀, reflexivity end
 
-definition ppmap_pequiv_bppmap_natural (f : A' →* A) (g : B' →* B) (h : C →* C') :
-  psquare (ppmap_pequiv_bppmap A B C) (ppmap_pequiv_bppmap A' B' C')
-          (ppcompose_right' f ∘* ppcompose_left' (ppcompose_right' g ∘* ppcompose_left' h))
-          (bppmap_functor f g h) :=
-begin
+Definition ppMap_pequiv_bppMap_natural (f : A' ->* A) (g : B' ->* B) (h : C ->* C') :
+  psquare (ppMap_pequiv_bppMap A B C) (ppMap_pequiv_bppMap A' B' C')
+  (ppcompose_right' f o* ppcompose_left' (ppcompose_right' g o* ppcompose_left' h))
+  (bppMap_functor f g h).
+Proof.
   induction A with A a₀, induction B with B b₀, induction C' with C' c₀',
   induction f with f f₀, induction g with g g₀, induction h with h h₀, esimp at *,
   induction f₀, induction g₀, induction h₀,
-  fapply phomotopy.mk,
+  fapply Build_pHomotopy,
   { intro k, fapply bpmap_eq,
-    { intro a, exact !passoc⁻¹* },
-    { intro b, apply vdeg_square, esimp,
-      refine ap02 _ !idp_con ⬝ _ ⬝ (ap (λx, ap010 pmap.to_fun x b) !idp_con)⁻¹ᵖ,
-      refine ap02 _ !ap_eq_ap010⁻¹ ⬝ !ap_compose' ⬝ !ap_compose ⬝ !ap_eq_ap010 },
-    { exact sorry }},
+  { intro a, exact !passoc^-1* },
+  { intro b, apply vdeg_square, esimp,
+  refine ap02 _ (concat_1p _) @ _ @ (ap (fun x => ap010 pmap.to_fun x b) (concat_1p _))^-1ᵖ =>
+  refine ap02 _ !ap_eq_ap010^-1 @ !ap_compose' @ !ap_compose @ !ap_eq_ap010 },
+  { exact sorry }},
   { exact sorry }
-end
+Defined.
 
-(* maybe this is useful for pointed naturality in C? -/
-definition ppmap_pequiv_bppmap_natural_right (h : C →* C') :
-  psquare (ppmap_pequiv_bppmap A B C) (ppmap_pequiv_bppmap A B C')
-          (ppcompose_left' (ppcompose_left' h))
-          (bppmap_functor !pid !pid h) :=
-begin
+(* maybe this is useful for pointed naturality in C? *)
+Definition ppMap_pequiv_bppMap_natural_right (h : C ->* C') :
+  psquare (ppMap_pequiv_bppMap A B C) (ppMap_pequiv_bppMap A B C')
+  (ppcompose_left' (ppcompose_left' h))
+  (bppMap_functor !pid !pid h).
+Proof.
   induction A with A a₀, induction B with B b₀, induction C' with C' c₀',
   induction h with h h₀, esimp at *, induction h₀,
-  fapply phomotopy.mk,
+  fapply Build_pHomotopy,
   { intro k, fapply bpmap_eq,
-    { intro a, exact pwhisker_left _ !pcompose_pid },
-    { intro b, apply vdeg_square, esimp,
-      refine ap02 _ !idp_con ⬝ _,
-      refine ap02 _ !ap_eq_ap010⁻¹ ⬝ !ap_compose' ⬝ !ap_compose ⬝ !ap_eq_ap010 },
-    { exact sorry }},
+  { intro a, exact pwhisker_left _ !pcompose_pid },
+  { intro b, apply vdeg_square, esimp,
+  refine ap02 _ (concat_1p _) @ _,
+  refine ap02 _ !ap_eq_ap010^-1 @ !ap_compose' @ !ap_compose @ !ap_eq_ap010 },
+  { exact sorry }},
   { exact sorry }
-end
-end bpmap
+Defined.
+Defined. bpmap
 
-(* fiberwise pointed maps -/
-structure dbpmap {A : Type*} (B C : A → Type*) : Type :=
-  (f : Πa, B a →* C a)
-  (q : Πb, f pt b = pt)
-  (r : q pt = respect_pt (f pt))
+(* fiberwise pointed maps *)
+structure dbpmap {A : pType} (B C : A -> pType) : Type.
+  (f : forall a, B a ->* C a)
+  (q : forall b, f (point _) b = (point _))
+  (r : q (point _) = point_eq (f (point _)))
 
-attribute [coercion] dbpmap.f
-variables {A A' : Type*} {B C : A → Type*} {B' C' : A' → Type*} {f f' : dbpmap B C}
-definition respect_ptd1 [unfold 4] (f : dbpmap B C) (b : B pt) : f pt b = pt :=
+
+variables {A A' : pType} {B C : A -> pType} {B' C' : A' -> pType} {f f' : dbpmap B C}
+Definition point_eqd1 (f : dbpmap B C) (b : B (point _)) : f (point _) b = (point _).
 dbpmap.q f b
 
-definition respect_ptd2 [unfold 4] (f : dbpmap B C) (a : A) : f a pt = pt :=
-respect_pt (f a)
+Definition point_eqd2 (f : dbpmap B C) (a : A) : f a (point _) = (point _).
+point_eq (f a)
 
-definition respect_dptpt [unfold 4] (f : dbpmap B C) : respect_ptd1 f pt = respect_ptd2 f pt :=
+Definition respect_dptpt (f : dbpmap B C) : point_eqd1 f (point _) = point_eqd2 f (point _).
 dbpmap.r f
 
-definition dbpconst [constructor] (B C : A → Type*) : dbpmap B C :=
-dbpmap.mk (λa, pconst (B a) (C a)) (λb, idp) idp
+Definition dbpconst (B C : A -> pType) : dbpmap B C.
+dbBuild_pMap (fun a => pconst (B a) (C a)) (fun b => idp) idp
 
-definition dbppmap [constructor] (B C : A → Type*) : Type* :=
+Definition dbppMap (B C : A -> pType) : pType.
 pointed.MK (dbpmap B C) (dbpconst B C)
 
-definition ppi_of_dbpmap [constructor] (f : dbppmap B C) : Π*a, B a →** C a :=
-begin
+Definition ppi_of_dbpmap (f : dbppMap B C) : ppforall a, B a ->** C a.
+Proof.
   fapply ppi.mk,
-  { intro a, exact pmap.mk (f a) (respect_ptd2 f a) },
-  { exact eq_of_phomotopy (phomotopy.mk (respect_ptd1 f) (respect_dptpt f)) }
-end
+  { intro a, exact Build_pMap (f a) (point_eqd2 f a) },
+  { exact path_pforall (Build_pHomotopy (point_eqd1 f) (respect_dptpt f)) }
+Defined.
 
-definition dbpmap_of_ppi [constructor] (f : Π*a, B a →** C a) : dbppmap B C :=
-begin
-  apply dbpmap.mk (λa, f a) (ap010 pmap.to_fun (respect_pt f)),
-  exact respect_pt (phomotopy_of_eq (respect_pt f))
-end
+Definition dbpmap_of_ppi (f : ppforall a, B a ->** C a) : dbppMap B C.
+Proof.
+  apply dbBuild_pMap (fun a => f a) (ap010 pmap.to_fun (point_eq f)) =>
+  exact point_eq (phomotopy_path (point_eq f))
+Defined.
 
-protected definition dbpmap.sigma_char [constructor] (B C : A → Type*) :
-  dbpmap B C ≃ Σ(f : Πa, B a →* C a) (q : Πb, f pt b = pt), q pt = respect_pt (f pt) :=
-begin
+protectedDefinition dbpmap.sigma_char (B C : A -> pType) :
+  dbpmap B C <~> Σ(f : forall a, B a ->* C a) (q : forall b, f (point _) b = (point _)), q (point _) = point_eq (f (point _)).
+Proof.
   fapply equiv.MK,
-  { intro f, exact ⟨f, respect_ptd1 f, respect_dptpt f⟩ },
-  { intro fqr, exact dbpmap.mk fqr.1 fqr.2.1 fqr.2.2 },
+  { intro f, exact ⟨f, point_eqd1 f, respect_dptpt f⟩ },
+  { intro fqr, exact dbBuild_pMap fqr.1 fqr.2.1 fqr.2.2 },
   { intro fqr, induction fqr with f qr, induction qr with q r, reflexivity },
   { intro f, induction f, reflexivity }
-end
+Defined.
 
-definition dbpmap_eq_equiv [constructor] (f f' : dbpmap B C):
-  f = f' ≃ Σ(h : Πa, f a ~* f' a) (q : Πb, square (respect_ptd1 f b) (respect_ptd1 f' b) (h pt b) idp), cube (vdeg_square (respect_dptpt f)) (vdeg_square (respect_dptpt f'))
-       vrfl ids
-       (q pt) (to_homotopy_pt_square (h pt)) :=
-begin
-  refine eq_equiv_fn_eq (dbpmap.sigma_char B C) f f' ⬝e _,
-  refine !sigma_eq_equiv ⬝e _, esimp,
-  refine sigma_equiv_sigma (!eq_equiv_homotopy ⬝e pi_equiv_pi_right (λa, !pmap_eq_equiv)) _,
+Definition dbpmap_eq_equiv (f f' : dbpmap B C):
+  f = f' <~> Σ(h : forall a, f a ==* f' a) (q : forall b, square (point_eqd1 f b) (point_eqd1 f' b) (h (point _) b) idp), cube (vdeg_square (respect_dptpt f)) (vdeg_square (respect_dptpt f'))
+  vrfl ids
+  (q (point _)) (point_htpy_square (h (point _))).
+Proof.
+  refine eq_equiv_fn_eq (dbpmap.sigma_char B C) f f' @e _,
+  refine !sigma_eq_equiv @e _, esimp,
+  refine sigma_equiv_sigma (!eq_equiv_homotopy @e pi_equiv_pi_right (fun a => !pmap_eq_equiv)) _,
   intro h, exact sorry
-end
+Defined.
 
-definition dbpmap_eq [constructor] (h : Πa, f a ~* f' a)
-  (q : Πb, square (respect_ptd1 f b) (respect_ptd1 f' b) (h pt b) idp)
+Definition dbpmap_eq (h : forall a, f a ==* f' a)
+  (q : forall b, square (point_eqd1 f b) (point_eqd1 f' b) (h (point _) b) idp)
   (r : cube (vdeg_square (respect_dptpt f)) (vdeg_square (respect_dptpt f'))
-       vrfl ids
-       (q pt) (to_homotopy_pt_square (h pt))) : f = f' :=
-(dbpmap_eq_equiv f f')⁻¹ᵉ ⟨h, q, r⟩
+  vrfl ids
+  (q (point _)) (point_htpy_square (h (point _)))) : f = f'.
+(dbpmap_eq_equiv f f')^-1ᵉ ⟨h, q, r⟩
 
-definition ppi_equiv_dbpmap [constructor] (B C : A → Type*) : (Π*a, B a →** C a) ≃ dbpmap B C :=
-begin
-  refine !ppi.sigma_char ⬝e _ ⬝e !dbpmap.sigma_char⁻¹ᵉ,
-  refine sigma_equiv_sigma_right (λf, pmap_eq_equiv (f pt) !pconst) ⬝e _,
-  refine sigma_equiv_sigma_right (λf, !phomotopy.sigma_char)
-end
+Definition ppi_equiv_dbpmap (B C : A -> pType) : (ppforall a, B a ->** C a) <~> dbpmap B C.
+Proof.
+  refine !ppi.sigma_char @e _ @e !dbpmap.sigma_char^-1ᵉ,
+  refine sigma_equiv_sigma_right (fun f => pmap_eq_equiv (f (point _)) !pconst) @e _,
+  refine sigma_equiv_sigma_right (fun f => !phomotopy.sigma_char)
+Defined.
 
-definition ppi_equiv_dbpmap' [constructor] (B C : A → Type*) : (Π*a, B a →** C a) ≃ dbpmap B C :=
-begin
-  refine equiv_change_fun (ppi_equiv_dbpmap B C) _,
+Definition ppi_equiv_dbpmap' (B C : A -> pType) : (ppforall a, B a ->** C a) <~> dbpmap B C.
+Proof.
+  refine equiv_change_fun (ppi_equiv_dbpmap B C) _ =>
   exact dbpmap_of_ppi, intro f, reflexivity
-end
+Defined.
 
-definition pppi_pequiv_dbppmap [constructor] (B C : A → Type*) :
-  (Π*a, B a →** C a) ≃* dbppmap B C :=
+Definition pppi_pequiv_dbppMap (B C : A -> pType) :
+  (ppforall a, B a ->** C a) <~>* dbppMap B C.
 pequiv_of_equiv (ppi_equiv_dbpmap' B C) idp
 
-definition dbpmap_functor [constructor] (f : A' →* A) (g : Πa, B' a →* B (f a)) (h : Πa, C (f a) →* C' a)
-  (k : dbpmap B C) : dbpmap B' C' :=
-begin
-  fapply dbpmap.mk (λa', h a' ∘* k (f a') ∘* g a'),
-  { intro b', refine ap (h pt) _ ⬝ respect_pt (h pt),
-    exact sorry }, --ap010 (λa b, k a b) (respect_pt f) (g pt b') ⬝ respect_ptd1 k (g pt b') },
+Definition dbpmap_functor (f : A' ->* A) (g : forall , B' a ->* B (f a)) (h : forall a, C (f a) ->* C' a)
+  (k : dbpmap B C) : dbpmap B' C'.
+Proof.
+  fapply dbBuild_pMap (fun a' => h a' o* k (f a') o* g a'),
+  { intro b', refine ap (h (point _)) _ @ point_eq (h (point _)),
+  exact sorry }, --ap010 (fun a b => k a b) (point_eq f) (g (point _) b') @ point_eqd1 k (g (point _) b') },
   { exact sorry },
-    -- apply whisker_right, apply ap02 h, esimp,
-    -- induction A with A a₀, induction B with B b₀, induction f with f f₀, induction g with g g₀,
-    -- esimp at *, induction f₀, induction g₀, esimp, apply whisker_left, exact respect_dptpt k },
-end
+Defined.
 
-end pointed
+Defined. pointed

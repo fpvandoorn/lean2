@@ -17,5 +17,5 @@ Currently, the following differences exist between the two libraries, relevant t
 H : is_trunc 0 A |- is_trunc (succ (-1)) A
 H : is_trunc 1 A |- is_trunc (succ 0) A
 ```
-- Projections of most algebraic structures are definitions instead of theorems in HoTT
+- Projections of most algebraic structures areDefinitions instead ofDefinitions in HoTT
 - Basic properties of `nat.add` have a simpler proof in HoTT (so that it computes better)

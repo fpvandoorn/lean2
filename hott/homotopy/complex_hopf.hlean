@@ -1,11 +1,11 @@
-/-
+(*
 Copyright (c) 2016 Ulrik Buchholtz and Egbert Rijke. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Ulrik Buchholtz, Egbert Rijke, Floris van Doorn
 
 The H-space structure on S¹ and the complex Hopf fibration
  (the standard one).
--/
+*)
 
 import .hopf .circle types.fin
 
@@ -14,39 +14,39 @@ open eq equiv is_equiv circle is_conn trunc is_trunc sphere susp pointed fiber s
 
 namespace hopf
 
-  definition circle_h_space [instance] : h_space S¹ :=
-  ⦃ h_space, one := base, mul := circle_mul,
-    one_mul := circle_base_mul, mul_one := circle_mul_base ⦄
+Definition circle_h_space [instance] : h_space S¹.
+  ( h_space, one . base, mul . circle_mul,
+    one_mul . circle_base_mul, mul_one . circle_mul_base )
 
-  definition circle_assoc (x y z : S¹) : (x * y) * z = x * (y * z) :=
-  begin
+Definition circle_assoc (x y z : S¹) : (x * y) * z = x * (y * z).
+Proof.
     induction x,
     { reflexivity },
     { apply eq_pathover, induction y,
       { exact natural_square
-          (λa : S¹, ap (λb : S¹, b * z) (circle_mul_base a))
+          (fun a : S¹ => ap (fun b : S¹ => b * z) (circle_mul_base a))
           loop },
       { apply is_prop.elimo, apply is_trunc_square }}
-  end
+Defined.
 
-  definition complex_hopf' : S 3 → S 2 :=
-  begin
+Definition complex_hopf' : S 3 -> S 2.
+Proof.
     intro x, apply @sigma.pr1 (susp S¹) (hopf S¹),
-    apply inv (hopf.total S¹), exact (join_sphere 1 1)⁻¹ᵉ x
-  end
+    apply inv (hopf.total S¹), exact (join_sphere 1 1)^-1ᵉ x
+Defined.
 
-  definition complex_hopf [constructor] : S 3 →* S 2 :=
-  proof pmap.mk complex_hopf' idp qed
+Definition complex_hopf : S 3 ->* S 2.
+  proof Build_pMap complex_hopf' idp qed
 
-  definition pfiber_complex_hopf : pfiber complex_hopf ≃* S 1 :=
-  begin
+Definition pfiber_complex_hopf : pfiber complex_hopf <~>* S 1.
+Proof.
     fapply pequiv_of_equiv,
     { esimp, unfold [complex_hopf'],
-      refine fiber.equiv_precompose (sigma.pr1 ∘ (hopf.total S¹)⁻¹ᵉ)
-        (join_sphere 1 1)⁻¹ᵉ _ ⬝e _,
-      refine fiber.equiv_precompose _ (hopf.total S¹)⁻¹ᵉ _ ⬝e _,
+      refine fiber.equiv_precompose (sigma.pr1 o (hopf.total S¹)^-1ᵉ)
+        (join_sphere 1 1)^-1ᵉ _ @e _,
+      refine fiber.equiv_precompose _ (hopf.total S¹)^-1ᵉ _ @e _,
       apply fiber_pr1 },
     { reflexivity }
-  end
+Defined.
 
-end hopf
+Defined. hopf

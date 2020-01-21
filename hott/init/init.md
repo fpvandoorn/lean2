@@ -3,7 +3,7 @@ init
 
 The files in this folder are required by low-level operations, and
 are always imported by default. You can suppress this behavior by
-beginning a file with the keyword "prelude".
+Proof.ning a file with the keyword "prelude".
 
 Syntax declarations:
 
@@ -18,7 +18,7 @@ Datatypes and logic:
 * [num](num.hlean)
 * [nat](nat.hlean)
 * [function](function.hlean)
-* [types](types.hlean) (notation and some theorems for the remaining basic types)
+* [types](types.hlean) (notation and someDefinitions for the remaining basic types)
 * [connectives](connectives.hlean)
 
 HoTT basics:
@@ -30,7 +30,7 @@ HoTT basics:
 * [equiv](equiv.hlean)
 * [pointed](pointed.hlean)
 * [ua](ua.hlean) (declaration of the univalence axiom, and some basic properties)
-* [funext](funext.hlean) (proof of equivalence of certain notions of function exensionality, and a proof that function extensionality follows from univalence)
+* [funext](funext.hlean) (proof of equivalence of certain notions of function exensionality => and a proof that function extensionality follows from univalence)
 
 Support for well-founded recursion and automation:
 

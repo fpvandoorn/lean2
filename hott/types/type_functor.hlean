@@ -1,56 +1,56 @@
-/-
+(*
 Copyright (c) 2016 Jakob von Raumer. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Jakob von Raumer
 
-Pointed and unpointed type functor, and adjoint pairs.
+Pointed and unpointed type functor => and adjoint pairs.
 More or less ported from Evan Cavallo's HoTT-Agda homotopy library.
--/
+*)
 
 import types.pointed
 
 open equiv function pointed
 
-structure type_functor : Type :=
-  (fun_ty : Type → Type)
-  (fun_arr : Π {A B}, (A → B) → (fun_ty A → fun_ty B))
-  (respect_id : Π {A}, fun_arr (@id A) = id)
-  (respect_comp : Π {A B C} (g : B → C) (f : A → B),
-    fun_arr (g ∘ f) = (fun_arr g) ∘ (fun_arr f))
+structure type_functor : Type.
+  (fun_ty : Type -> Type)
+  (fun_arr : forall , (A -> B) -> (fun_ty A -> fun_ty B))
+  (respect_id : forall {A}, fun_arr (@id A) = id)
+  (respect_comp : forall {A B C} (g : B -> C) (f : A -> B),
+    fun_arr (g o f) = (fun_arr g) o (fun_arr f))
 
-attribute [coercion] type_functor.fun_ty
+
 
 section type_adjoint
 open type_functor
 
-structure type_adjoint (F G : type_functor) : Type :=
-  (η : Π X, X → G (F X))
-  (ε : Π U, F (G U) → U)
-  (ηnat : Π X Y (h : X → Y), η Y ∘ h = fun_arr G (fun_arr F h) ∘ η X)
-  (εnat : Π U V (k : U → V), ε V ∘ fun_arr F (fun_arr G k) = k ∘ ε U)
-  (εF_Fη : Π X, ε (F X) ∘ fun_arr F (η X) = id)
-  (Gε_ηG : Π U, fun_arr G (ε U) ∘ η (G U) = id)
+structure type_adjoint (F G : type_functor) : Type.
+  (η : forall X, X -> G (F X))
+  (ε : forall U, F (G U) -> U)
+  (ηnat : forall X Y (h : X -> Y), η Y o h = fun_arr G (fun_arr F h) o η X)
+  (εnat : forall U V (k : U -> V), ε V o fun_arr F (fun_arr G k) = k o ε U)
+  (εF_Fη : forall X, ε (F X) o fun_arr F (η X) = id)
+  (Gε_ηG : forall U, fun_arr G (ε U) o η (G U) = id)
 
-end type_adjoint
+Defined. type_adjoint
 
-structure Type_functor : Type :=
-  (fun_ty : Type* → Type*)
-  (fun_arr : Π {A B}, (A →* B) → (fun_ty A →* fun_ty B))
-  (respect_id : Π {A}, fun_arr (pid A) = pid (fun_ty A))
-  (respect_comp : Π {A B C} (g : B →* C) (f : A →* B),
-    fun_arr (g ∘* f) = fun_arr g ∘* fun_arr f)
+structure Type_functor : Type.
+  (fun_ty : pType -> pType)
+  (fun_arr : forall , (A ->* B) -> (fun_ty A ->* fun_ty B))
+  (respect_id : forall {A}, fun_arr (pid A) = pid (fun_ty A))
+  (respect_comp : forall {A B C} (g : B ->* C) (f : A ->* B),
+    fun_arr (g o* f) = fun_arr g o* fun_arr f)
 
-attribute [coercion] Type_functor.fun_ty
+
 
 section Type_adjoint
 open Type_functor
 
-structure Type_adjoint (F G : Type_functor) : Type :=
-  (η : Π (X : Type*), X →* G (F X))
-  (ε : Π (U : Type*), F (G U) →* U)
-  (ηnat : Π {X Y} (h : X →* Y), η Y ∘* h = (fun_arr G (fun_arr F h)) ∘* η X)
-  (εnat : Π {U V} (k : U →* V), ε V ∘* (fun_arr F (fun_arr G k)) = k ∘* ε U)
-  (εF_Fη : Π {X}, ε (F X) ∘* (fun_arr F (η X)) = !pid)
-  (Gε_ηG : Π {U}, (fun_arr G (ε U)) ∘* η (G U) = !pid)
+structure Type_adjoint (F G : Type_functor) : Type.
+  (η : forall (X : pType), X ->* G (F X))
+  (ε : forall (U : pType), F (G U) ->* U)
+  (ηnat : forall {X Y} (h : X ->* Y), η Y o* h = (fun_arr G (fun_arr F h)) o* η X)
+  (εnat : forall {U V} (k : U ->* V), ε V o* (fun_arr F (fun_arr G k)) = k o* ε U)
+  (εF_Fη : forall {X}, ε (F X) o* (fun_arr F (η X)) = !pid)
+  (Gε_ηG : forall {U}, (fun_arr G (ε U)) o* η (G U) = !pid)
 
-end Type_adjoint
+Defined. Type_adjoint

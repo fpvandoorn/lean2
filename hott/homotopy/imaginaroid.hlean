@@ -1,10 +1,10 @@
-/-
+(*
 Copyright (c) 2016 Ulrik Buchholtz and Egbert Rijke. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Ulrik Buchholtz, Egbert Rijke
 
 Cayley-Dickson construction via imaginaroids
--/
+*)
 
 import algebra.group cubical.square types.pi .hopf
 
@@ -13,13 +13,13 @@ open [notation] sum
 
 namespace imaginaroid
 
-structure has_star [class] (A : Type) :=
-(star : A → A)
+structure has_star [class] (A : Type).
+(star : A -> A)
 
 reserve postfix `*` : (max+1)
-postfix `*` := has_star.star
+postfix `*` . has_star.star
 
-structure involutive_neg [class] (A : Type) extends has_neg A :=
+structure involutive_neg [class] (A : Type) extends has_neg A.
 (neg_neg : ∀a, neg (neg a) = a)
 
 section
@@ -27,112 +27,112 @@ section
   variable [H : involutive_neg A]
   include H
 
-  theorem neg_neg (a : A) : - -a = a := !involutive_neg.neg_neg
-end
+Definition neg_neg (a : A) : - -a = a . !involutive_neg.neg_neg
+Defined.
 
 section
-  /- In this section we construct, when A has a negation,
+  (* In this section we construct, when A has a negation,
      a unit, a negation and a conjugation on susp A.
      The unit 1 is north, so south is -1.
      The negation must then swap north and south,
      while the conjugation fixes the poles and negates on meridians.
-  -/
+  *)
   variable {A : Type}
 
-  definition has_one_susp [instance] : has_one (susp A) :=
-  ⦃ has_one, one := north ⦄
+Definition has_one_susp [instance] : has_one (susp A).
+  ( has_one, one . north )
 
   variable [H : has_neg A]
   include H
 
-  definition susp_neg : susp A → susp A :=
-  susp.elim south north (λa, (merid (neg a))⁻¹)
+Definition susp_neg : susp A -> susp A.
+  susp.elim south north (fun a => (merid (neg a))^-1)
 
-  definition has_neg_susp [instance] : has_neg (susp A) :=
-  ⦃ has_neg, neg := susp_neg⦄
+Definition has_neg_susp [instance] : has_neg (susp A).
+  ( has_neg, neg . susp_neg)
 
-  definition susp_star : susp A → susp A :=
-  susp.elim north south (λa, merid (neg a))
+Definition susp_star : susp A -> susp A.
+  susp.elim north south (fun a => merid (neg a))
 
-  definition has_star_susp [instance] : has_star (susp A) :=
-  ⦃ has_star, star := susp_star ⦄
-end
+Definition has_star_susp [instance] : has_star (susp A).
+  ( has_star, star . susp_star )
+Defined.
 
 section
-  -- If negation on A is involutive, so is negation on susp A
+  (* If negation on A is involutive, so is negation on susp A *)
   variable {A : Type}
   variable [H : involutive_neg A]
   include H
 
-  definition susp_neg_neg (x : susp A) : - - x = x :=
-  begin
+Definition susp_neg_neg (x : susp A) : - - x = x.
+Proof.
     induction x with a,
     { reflexivity },
     { reflexivity },
     { apply eq_pathover, rewrite ap_id,
-      rewrite (ap_compose' (λy, -y)),
+      rewrite (ap_compose' (fun y => -y)),
       krewrite susp.elim_merid, rewrite ap_inv,
       krewrite susp.elim_merid, rewrite neg_neg,
       rewrite inv_inv, apply hrefl }
-  end
+Defined.
 
-  definition involutive_neg_susp [instance] : involutive_neg (susp A) :=
-  ⦃ involutive_neg, neg_neg := susp_neg_neg ⦄
+Definition involutive_neg_susp [instance] : involutive_neg (susp A).
+  ( involutive_neg, neg_neg . susp_neg_neg )
 
-  definition susp_star_star (x : susp A) : x** = x :=
-  begin
+Definition susp_star_star (x : susp A) : x** = x.
+Proof.
     induction x with a,
     { reflexivity },
     { reflexivity },
     { apply eq_pathover, rewrite ap_id,
-      krewrite (ap_compose' (λy, y*)),
+      krewrite (ap_compose' (fun y => y*)),
       do 2 krewrite susp.elim_merid, rewrite neg_neg,
       apply hrefl }
-  end
+Defined.
 
-  definition susp_neg_star (x : susp A) : (-x)* = -x* :=
-  begin
+Definition susp_neg_star (x : susp A) : (-x)* = -x*.
+Proof.
     induction x with a,
     { reflexivity },
     { reflexivity },
     { apply eq_pathover,
-      krewrite [ap_compose' (λy, y*),ap_compose' (λy, -y) (λy, y*)],
+      krewrite [ap_compose' (fun y => y*),ap_compose' (fun y => -y) (fun y => y*)],
       do 3 krewrite susp.elim_merid, rewrite ap_inv, krewrite susp.elim_merid,
       apply hrefl }
-  end
-end
+Defined.
+Defined.
 
 structure imaginaroid [class] (A : Type)
-  extends involutive_neg A, has_mul (susp A) :=
+  extends involutive_neg A, has_mul (susp A).
 (one_mul : ∀x, mul one x = x)
 (mul_one : ∀x, mul x one = x)
-(mul_neg : ∀x y, mul x (@susp_neg A ⦃ has_neg, neg := neg ⦄ y) =
-           @susp_neg A ⦃ has_neg, neg := neg ⦄ (mul x y))
-(norm : ∀x, mul x (@susp_star A ⦃ has_neg, neg := neg ⦄ x) = one)
-(star_mul : ∀x y, @susp_star A ⦃ has_neg, neg := neg ⦄ (mul x y)
-  = mul (@susp_star A ⦃ has_neg, neg := neg ⦄ y)
-        (@susp_star A ⦃ has_neg, neg := neg ⦄ x))
+(mul_neg : ∀x y, mul x (@susp_neg A ( has_neg, neg . neg ) y) =
+           @susp_neg A ( has_neg, neg . neg ) (mul x y))
+(norm : ∀x, mul x (@susp_star A ( has_neg, neg . neg ) x) = one)
+(star_mul : ∀x y, @susp_star A ( has_neg, neg . neg ) (mul x y)
+  = mul (@susp_star A ( has_neg, neg . neg ) y)
+        (@susp_star A ( has_neg, neg . neg ) x))
 
 section
   variable {A : Type}
   variable [H : imaginaroid A]
   include H
 
-  theorem one_mul (x : susp A) : 1 * x = x := !imaginaroid.one_mul
-  theorem mul_one (x : susp A) : x * 1 = x := !imaginaroid.mul_one
-  theorem mul_neg (x y : susp A) : x * -y = -x * y := !imaginaroid.mul_neg
+Definition one_mul (x : susp A) : 1 * x = x . !imaginaroid.one_mul
+Definition mul_one (x : susp A) : x * 1 = x . !imaginaroid.mul_one
+Definition mul_neg (x y : susp A) : x * -y = -x * y . !imaginaroid.mul_neg
 
-  /- this should not be an instance because we typically construct
+  (* this should not be an instance because we typically construct
      the h_space structure on susp A before defining
-     the imaginaroid structure on A -/
-  definition imaginaroid_h_space : h_space (susp A) :=
-  ⦃ h_space, one := one, mul := mul, one_mul := one_mul, mul_one := mul_one ⦄
+     the imaginaroid structure on A *)
+Definition imaginaroid_h_space : h_space (susp A).
+  ( h_space, one . one, mul . mul, one_mul . one_mul, mul_one . mul_one )
 
-  theorem norm (x : susp A) : x * x* = 1 := !imaginaroid.norm
-  theorem star_mul (x y : susp A) : (x * y)* = y* * x* := !imaginaroid.star_mul
-  theorem one_star : 1* = 1 :> susp A := idp
+Definition norm (x : susp A) : x * x* = 1 . !imaginaroid.norm
+Definition star_mul (x y : susp A) : (x * y)* = y* * x* . !imaginaroid.star_mul
+Definition one_star : 1* = 1 :> susp A . idp
 
-  theorem neg_mul (x y : susp A) : (-x) * y = -x * y :=
+Definition neg_mul (x y : susp A) : (-x) * y = -x * y.
   calc
     (-x) * y = ((-x) * y)**  : susp_star_star
          ... = (y* * (-x)*)* : star_mul
@@ -143,20 +143,20 @@ section
          ... = -x * y**      : susp_star_star
          ... = -x * y        : susp_star_star
 
-  theorem norm' (x : susp A) : x* * x = 1 :=
+Definition norm' (x : susp A) : x* * x = 1.
   calc
     x* * x = (x* * x)**  : susp_star_star
        ... = (x* * x**)* : star_mul
        ... = 1*          : norm
        ... = 1           : one_star
-end
+Defined.
 
-/- Here we prove that if A has an associative imaginaroid structure,
-   then join (susp A) (susp A) gets an h_space structure -/
+(* Here we prove that if A has an associative imaginaroid structure,
+   then join (susp A) (susp A) gets an h_space structure *)
 section
   parameter A : Type
   parameter [H : imaginaroid A]
-  parameter (assoc : Πa b c : susp A, (a * b) * c = a * b * c)
+  parameter (assoc : forall a b c : susp A, (a * b) * c = a * b * c)
   include A H assoc
 
   open join
@@ -164,18 +164,18 @@ section
   section lemmata
     parameters (a b c d : susp A)
 
-    local abbreviation f : susp A → susp A :=
-    λx, a * c * (-x)
+    local abbreviation f : susp A -> susp A.
+    fun x => a * c * (-x)
 
-    local abbreviation g : susp A → susp A :=
-    λy, c * y * b
+    local abbreviation g : susp A -> susp A.
+    fun y => c * y * b
 
-    definition lemma_1 : f (-1) = a * c :=
+Definition lemma_1 : f (-1) = a * c.
     calc
       a * c * (- -1) = a * c * 1  : idp
                  ... = a * c      : mul_one
 
-    definition lemma_2 : f (c* * a* * d * b*) = - d * b* :=
+Definition lemma_2 : f (c* * a* * d * b*) = - d * b*.
     calc
       a * c * (-c* * a* * d * b*)
         = a * (-c * c* * a* * d * b*)     : mul_neg
@@ -189,11 +189,11 @@ section
     ... = -1 * d * b*                     : norm
     ... = -d * b*                         : one_mul
 
-    definition lemma_3 : g 1 = c * b :=
+Definition lemma_3 : g 1 = c * b.
     calc
       c * 1 * b = c * b : one_mul
 
-    definition lemma_4 : g (c* * a* * d * b*) = a* * d :=
+Definition lemma_4 : g (c* * a* * d * b*) = a* * d.
     calc
       c * (c* * a* * d * b*) * b
         = (c * c* * a* * d * b*) * b      : assoc
@@ -204,17 +204,17 @@ section
     ... = a* * d * b* * b                 : assoc
     ... = a* * d * 1                      : norm'
     ... = a* * d                          : mul_one
-  end lemmata
+Defined. lemmata
 
-  /-
+  (*
     in the algebraic form, the Cayley-Dickson multiplication has:
 
       (a,b) * (c,d) = (a * c - d * b*, a* * d + c * b)
 
     here we do the spherical form.
-  -/
-  definition cd_mul (x y : join (susp A) (susp A)) : join (susp A) (susp A) :=
-  begin
+  *)
+Definition cd_mul (x y : join (susp A) (susp A)) : join (susp A) (susp A).
+Proof.
     induction x with a b a b,
     { induction y with c d c d,
       { exact inl (a * c) },
@@ -240,30 +240,30 @@ section
         { apply join.vdiamond, reflexivity },
         { apply join.hdiamond, reflexivity },
         { apply join.twist_diamond } } }
-  end
+Defined.
 
-  definition cd_one_mul (x : join (susp A) (susp A)) : cd_mul (inl 1) x = x :=
-  begin
+Definition cd_one_mul (x : join (susp A) (susp A)) : cd_mul (inl 1) x = x.
+Proof.
     induction x with a b a b,
     { apply ap inl, apply one_mul },
     { apply ap inr, apply one_mul },
     { apply eq_pathover, rewrite ap_id, unfold cd_mul, krewrite join.elim_glue,
       apply join.hsquare }
-  end
+Defined.
 
-  definition cd_mul_one (x : join (susp A) (susp A)) : cd_mul x (inl 1) = x :=
-  begin
+Definition cd_mul_one (x : join (susp A) (susp A)) : cd_mul x (inl 1) = x.
+Proof.
     induction x with a b a b,
     { apply ap inl, apply mul_one },
     { apply ap inr, apply one_mul },
     { apply eq_pathover, rewrite ap_id, unfold cd_mul, krewrite join.elim_glue,
       apply join.hsquare }
-  end
+Defined.
 
-  definition cd_h_space [instance] : h_space (join (susp A) (susp A)) :=
-  ⦃ h_space, one := inl one, mul := cd_mul,
-    one_mul := cd_one_mul, mul_one := cd_mul_one ⦄
+Definition cd_h_space [instance] : h_space (join (susp A) (susp A)).
+  ( h_space, one . inl one, mul . cd_mul,
+    one_mul . cd_one_mul, mul_one . cd_mul_one )
 
-end
+Defined.
 
-end imaginaroid
+Defined. imaginaroid

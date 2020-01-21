@@ -1,98 +1,98 @@
-/-
+(*
 Copyright (c) 2014 Floris van Doorn. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Floris van Doorn, Leonardo de Moura, Jeremy Avigad
 
 The order relation on the natural numbers.
--/
+*)
 import .basic algebra.ordered_ring
 open eq eq.ops algebra algebra
 
 namespace nat
 
-/- lt and le -/
+(* lt and le *)
 
-protected theorem le_of_lt_sum_eq {m n : ℕ} (H : m < n ⊎ m = n) : m ≤ n :=
+protectedDefinition le_of_lt_sum_eq {m n : ℕ} (H : m < n ⊎ m = n) : m ≤ n :=
 nat.le_of_eq_sum_lt (sum.swap H)
 
-protected theorem lt_sum_eq_of_le {m n : ℕ} (H : m ≤ n) : m < n ⊎ m = n :=
+protectedDefinition lt_sum_eq_of_le {m n : ℕ} (H : m ≤ n) : m < n ⊎ m = n :=
 sum.swap (nat.eq_sum_lt_of_le H)
 
-protected theorem le_iff_lt_sum_eq (m n : ℕ) : m ≤ n ↔ m < n ⊎ m = n :=
+protectedDefinition le_iff_lt_sum_eq (m n : ℕ) : m ≤ n ↔ m < n ⊎ m = n :=
 iff.intro nat.lt_sum_eq_of_le nat.le_of_lt_sum_eq
 
-protected theorem lt_of_le_prod_ne {m n : ℕ} (H1 : m ≤ n) : m ≠ n → m < n :=
+protectedDefinition lt_of_le_prod_ne {m n : ℕ} (H1 : m ≤ n) : m ≠ n -> m < n :=
 sum_resolve_right (nat.eq_sum_lt_of_le H1)
 
-protected theorem lt_iff_le_prod_ne (m n : ℕ) : m < n ↔ m ≤ n × m ≠ n :=
+protectedDefinition lt_iff_le_prod_ne (m n : ℕ) : m < n ↔ m ≤ n \* m ≠ n :=
 iff.intro
-  (take H, pair (nat.le_of_lt H) (take H1, !nat.lt_irrefl (H1 ▸ H)))
+  (take H, pair (nat.le_of_lt H) (take H1, !nat.lt_irrefl (H1 # H)))
   (prod.rec nat.lt_of_le_prod_ne)
 
-theorem le_add_right (n k : ℕ) : n ≤ n + k :=
-nat.rec !nat.le_refl (λ k, le_succ_of_le) k
+Definition le_add_right (n k : ℕ) : n ≤ n + k :=
+nat.rec !nat.le_refl (fun k => le_succ_of_le) k
 
-theorem le_add_left (n m : ℕ): n ≤ m + n :=
-!add.comm ▸ !le_add_right
+Definition le_add_left (n m : ℕ): n ≤ m + n :=
+!add.comm # !le_add_right
 
-theorem le.intro {n m k : ℕ} (h : n + k = m) : n ≤ m :=
-h ▸ !le_add_right
+Definition le.intro {n m k : ℕ} (h : n + k = m) : n ≤ m :=
+h # !le_add_right
 
-theorem le.elim {n m : ℕ} : n ≤ m → Σ k, n + k = m :=
-le.rec (sigma.mk 0 rfl) (λm h, sigma.rec
-  (λ k H, sigma.mk (succ k) (H ▸ rfl)))
+Definition le.elim {n m : ℕ} : n ≤ m -> Σ k, n + k = m :=
+le.rec (sigma.mk 0 rfl) (fun m h => sigma.rec
+  (fun k H => sigma.mk (succ k) (H # rfl)))
 
-protected theorem le_total {m n : ℕ} : m ≤ n ⊎ n ≤ m :=
+protectedDefinition le_total {m n : ℕ} : m ≤ n ⊎ n ≤ m :=
 sum.imp_left nat.le_of_lt !nat.lt_sum_ge
 
-/- addition -/
+(* addition *)
 
-protected theorem add_le_add_left {n m : ℕ} (H : n ≤ m) (k : ℕ) : k + n ≤ k + m :=
-obtain l Hl, from le.elim H, le.intro (Hl ▸ !add.assoc)
+protectedDefinition add_le_add_left {n m : ℕ} (H : n ≤ m) (k : ℕ) : k + n ≤ k + m :=
+obtain l Hl, from le.elim H, le.intro (Hl # !add.assoc)
 
-protected theorem add_le_add_right {n m : ℕ} (H : n ≤ m) (k : ℕ) : n + k ≤ m + k :=
-!add.comm ▸ !add.comm ▸ nat.add_le_add_left H k
+protectedDefinition add_le_add_right {n m : ℕ} (H : n ≤ m) (k : ℕ) : n + k ≤ m + k :=
+!add.comm # !add.comm # nat.add_le_add_left H k
 
-protected theorem le_of_add_le_add_left {k n m : ℕ} (H : k + n ≤ k + m) : n ≤ m :=
-obtain l Hl, from le.elim H, le.intro (nat.add_left_cancel (!add.assoc⁻¹ ⬝ Hl))
+protectedDefinition le_of_add_le_add_left {k n m : ℕ} (H : k + n ≤ k + m) : n ≤ m :=
+obtain l Hl, from le.elim H, le.intro (nat.add_left_cancel (!add.assoc^-1 @ Hl))
 
-protected theorem lt_of_add_lt_add_left {k n m : ℕ} (H : k + n < k + m) : n < m :=
+protectedDefinition lt_of_add_lt_add_left {k n m : ℕ} (H : k + n < k + m) : n < m :=
 let H' := nat.le_of_lt H in
-nat.lt_of_le_prod_ne (nat.le_of_add_le_add_left H') (assume Heq, !nat.lt_irrefl (Heq ▸ H))
+nat.lt_of_le_prod_ne (nat.le_of_add_le_add_left H') (assume Heq, !nat.lt_irrefl (Heq # H))
 
-protected theorem add_lt_add_left {n m : ℕ} (H : n < m) (k : ℕ) : k + n < k + m :=
-lt_of_succ_le (!add_succ ▸ nat.add_le_add_left (succ_le_of_lt H) k)
+protectedDefinition add_lt_add_left {n m : ℕ} (H : n < m) (k : ℕ) : k + n < k + m :=
+lt_of_succ_le (!add_succ # nat.add_le_add_left (succ_le_of_lt H) k)
 
-protected theorem add_lt_add_right {n m : ℕ} (H : n < m) (k : ℕ) : n + k < m + k :=
-!add.comm ▸ !add.comm ▸ nat.add_lt_add_left H k
+protectedDefinition add_lt_add_right {n m : ℕ} (H : n < m) (k : ℕ) : n + k < m + k :=
+!add.comm # !add.comm # nat.add_lt_add_left H k
 
-protected theorem lt_add_of_pos_right {n k : ℕ} (H : k > 0) : n < n + k :=
-!add_zero ▸ nat.add_lt_add_left H n
+protectedDefinition lt_add_of_pos_right {n k : ℕ} (H : k > 0) : n < n + k :=
+!add_zero # nat.add_lt_add_left H n
 
-/- multiplication -/
+(* multiplication *)
 
-theorem mul_le_mul_left {n m : ℕ} (k : ℕ) (H : n ≤ m) : k * n ≤ k * m :=
+Definition mul_le_mul_left {n m : ℕ} (k : ℕ) (H : n ≤ m) : k * n ≤ k * m :=
 obtain (l : ℕ) (Hl : n + l = m), from le.elim H,
 have k * n + k * l = k * m, by rewrite [-left_distrib, Hl],
 le.intro this
 
-theorem mul_le_mul_right {n m : ℕ} (k : ℕ) (H : n ≤ m) : n * k ≤ m * k :=
-!mul.comm ▸ !mul.comm ▸ !mul_le_mul_left H
+Definition mul_le_mul_right {n m : ℕ} (k : ℕ) (H : n ≤ m) : n * k ≤ m * k :=
+!mul.comm # !mul.comm # !mul_le_mul_left H
 
-protected theorem mul_le_mul {n m k l : ℕ} (H1 : n ≤ k) (H2 : m ≤ l) : n * m ≤ k * l :=
+protectedDefinition mul_le_mul {n m k l : ℕ} (H1 : n ≤ k) (H2 : m ≤ l) : n * m ≤ k * l :=
 nat.le_trans (!nat.mul_le_mul_right H1) (!nat.mul_le_mul_left H2)
 
-protected theorem mul_lt_mul_of_pos_left {n m k : ℕ} (H : n < m) (Hk : k > 0) : k * n < k * m :=
-nat.lt_of_lt_of_le (nat.lt_add_of_pos_right Hk) (!mul_succ ▸ nat.mul_le_mul_left k (succ_le_of_lt H))
+protectedDefinition mul_lt_mul_of_pos_left {n m k : ℕ} (H : n < m) (Hk : k > 0) : k * n < k * m :=
+nat.lt_of_lt_of_le (nat.lt_add_of_pos_right Hk) (!mul_succ # nat.mul_le_mul_left k (succ_le_of_lt H))
 
-protected theorem mul_lt_mul_of_pos_right {n m k : ℕ} (H : n < m) (Hk : k > 0) : n * k < m * k :=
-!mul.comm ▸ !mul.comm ▸ nat.mul_lt_mul_of_pos_left H Hk
+protectedDefinition mul_lt_mul_of_pos_right {n m k : ℕ} (H : n < m) (Hk : k > 0) : n * k < m * k :=
+!mul.comm # !mul.comm # nat.mul_lt_mul_of_pos_left H Hk
 
-/- nat is an instance of a linearly ordered semiring and a lattice -/
+(* nat is an instance of a linearly ordered semiring and a lattice *)
 
-protected definition decidable_linear_ordered_semiring [trans_instance] :
+protectedDefinition decidable_linear_ordered_semiring [trans_instance] :
 decidable_linear_ordered_semiring nat :=
-⦃ decidable_linear_ordered_semiring, nat.comm_semiring,
+( decidable_linear_ordered_semiring, nat.comm_semiring,
   add_left_cancel            := @nat.add_left_cancel,
   add_right_cancel           := @nat.add_right_cancel,
   lt                         := nat.lt,
@@ -115,117 +115,117 @@ decidable_linear_ordered_semiring nat :=
   mul_le_mul_of_nonneg_right := (take a b c H1 H2, nat.mul_le_mul_right c H1),
   mul_lt_mul_of_pos_left     := @nat.mul_lt_mul_of_pos_left,
   mul_lt_mul_of_pos_right    := @nat.mul_lt_mul_of_pos_right,
-  decidable_lt               := nat.decidable_lt ⦄
+  decidable_lt               := nat.decidable_lt )
 
-definition nat_has_dvd [instance] [priority nat.prio] : has_dvd nat :=
+Definition nat_has_dvd [instance] [priority nat.prio] : has_dvd nat :=
 has_dvd.mk has_dvd.dvd
 
-theorem add_pos_left {a : ℕ} (H : 0 < a) (b : ℕ) : 0 < a + b :=
+Definition add_pos_left {a : ℕ} (H : 0 < a) (b : ℕ) : 0 < a + b :=
 @add_pos_of_pos_of_nonneg _ _ a b H !zero_le
 
-theorem add_pos_right {a : ℕ} (H : 0 < a) (b : ℕ) : 0 < b + a :=
+Definition add_pos_right {a : ℕ} (H : 0 < a) (b : ℕ) : 0 < b + a :=
 by rewrite add.comm; apply add_pos_left H b
 
-theorem add_eq_zero_iff_eq_zero_prod_eq_zero {a b : ℕ} :
-a + b = 0 ↔ a = 0 × b = 0 :=
+Definition add_eq_zero_iff_eq_zero_prod_eq_zero {a b : ℕ} :
+a + b = 0 ↔ a = 0 \* b = 0 :=
 @add_eq_zero_iff_eq_zero_prod_eq_zero_of_nonneg_of_nonneg _ _ a b !zero_le !zero_le
 
-theorem le_add_of_le_left {a b c : ℕ} (H : b ≤ c) : b ≤ a + c :=
+Definition le_add_of_le_left {a b c : ℕ} (H : b ≤ c) : b ≤ a + c :=
 @le_add_of_nonneg_of_le _ _ a b c !zero_le H
 
-theorem le_add_of_le_right {a b c : ℕ} (H : b ≤ c) : b ≤ c + a :=
+Definition le_add_of_le_right {a b c : ℕ} (H : b ≤ c) : b ≤ c + a :=
 @le_add_of_le_of_nonneg _ _ a b c H !zero_le
 
-theorem lt_add_of_lt_left {b c : ℕ} (H : b < c) (a : ℕ) : b < a + c :=
+Definition lt_add_of_lt_left {b c : ℕ} (H : b < c) (a : ℕ) : b < a + c :=
 @lt_add_of_nonneg_of_lt _ _ a b c !zero_le H
 
-theorem lt_add_of_lt_right {b c : ℕ} (H : b < c) (a : ℕ) : b < c + a :=
+Definition lt_add_of_lt_right {b c : ℕ} (H : b < c) (a : ℕ) : b < c + a :=
 @lt_add_of_lt_of_nonneg _ _ a b c H !zero_le
 
-theorem lt_of_mul_lt_mul_left {a b c : ℕ} (H : c * a < c * b) : a < b :=
+Definition lt_of_mul_lt_mul_left {a b c : ℕ} (H : c * a < c * b) : a < b :=
 @lt_of_mul_lt_mul_left _ _ a b c H !zero_le
 
-theorem lt_of_mul_lt_mul_right {a b c : ℕ} (H : a * c < b * c) : a < b :=
+Definition lt_of_mul_lt_mul_right {a b c : ℕ} (H : a * c < b * c) : a < b :=
 @lt_of_mul_lt_mul_right _ _ a b c H !zero_le
 
-theorem pos_of_mul_pos_left {a b : ℕ} (H : 0 < a * b) : 0 < b :=
+Definition pos_of_mul_pos_left {a b : ℕ} (H : 0 < a * b) : 0 < b :=
 @pos_of_mul_pos_left _ _ a b H !zero_le
 
-theorem pos_of_mul_pos_right {a b : ℕ} (H : 0 < a * b) : 0 < a :=
+Definition pos_of_mul_pos_right {a b : ℕ} (H : 0 < a * b) : 0 < a :=
 @pos_of_mul_pos_right _ _ a b H !zero_le
 
-theorem zero_le_one : (0:nat) ≤ 1 :=
+Definition zero_le_one : (0:nat) ≤ 1 :=
 dec_star
 
-/- properties specific to nat -/
+(* properties specific to nat *)
 
-theorem lt_intro {n m k : ℕ} (H : succ n + k = m) : n < m :=
+Definition lt_intro {n m k : ℕ} (H : succ n + k = m) : n < m :=
 lt_of_succ_le (le.intro H)
 
-theorem lt_elim {n m : ℕ} (H : n < m) : Σk, succ n + k = m :=
+Definition lt_elim {n m : ℕ} (H : n < m) : Σk, succ n + k = m :=
 le.elim (succ_le_of_lt H)
 
-theorem lt_add_succ (n m : ℕ) : n < n + succ m :=
+Definition lt_add_succ (n m : ℕ) : n < n + succ m :=
 lt_intro !succ_add_eq_succ_add
 
-theorem eq_zero_of_le_zero {n : ℕ} (H : n ≤ 0) : n = 0 :=
+Definition eq_zero_of_le_zero {n : ℕ} (H : n ≤ 0) : n = 0 :=
 obtain (k : ℕ) (Hk : n + k = 0), from le.elim H,
 eq_zero_of_add_eq_zero_right Hk
 
-/- succ and pred -/
+(* succ and pred *)
 
-theorem le_of_lt_succ {m n : nat} : m < succ n → m ≤ n :=
+Definition le_of_lt_succ {m n : nat} : m < succ n -> m ≤ n :=
 le_of_succ_le_succ
 
-theorem lt_iff_succ_le (m n : nat) : m < n ↔ succ m ≤ n :=
+Definition lt_iff_succ_le (m n : nat) : m < n ↔ succ m ≤ n :=
 iff.rfl
 
-theorem lt_succ_iff_le (m n : nat) : m < succ n ↔ m ≤ n :=
+Definition lt_succ_iff_le (m n : nat) : m < succ n ↔ m ≤ n :=
 iff.intro le_of_lt_succ lt_succ_of_le
 
-theorem self_le_succ (n : ℕ) : n ≤ succ n :=
+Definition self_le_succ (n : ℕ) : n ≤ succ n :=
 le.intro !add_one
 
-theorem succ_le_sum_eq_of_le {n m : ℕ} : n ≤ m → succ n ≤ m ⊎ n = m :=
+Definition succ_le_sum_eq_of_le {n m : ℕ} : n ≤ m -> succ n ≤ m ⊎ n = m :=
 lt_sum_eq_of_le
 
-theorem pred_le_of_le_succ {n m : ℕ} : n ≤ succ m → pred n ≤ m :=
+Definition pred_le_of_le_succ {n m : ℕ} : n ≤ succ m -> pred n ≤ m :=
 pred_le_pred
 
-theorem succ_le_of_le_pred {n m : ℕ} : succ n ≤ m → n ≤ pred m :=
+Definition succ_le_of_le_pred {n m : ℕ} : succ n ≤ m -> n ≤ pred m :=
 pred_le_pred
 
-theorem pred_le_pred_of_le {n m : ℕ} : n ≤ m → pred n ≤ pred m :=
+Definition pred_le_pred_of_le {n m : ℕ} : n ≤ m -> pred n ≤ pred m :=
 pred_le_pred
 
-theorem pre_lt_of_lt {n m : ℕ} : n < m → pred n < m :=
+Definition pre_lt_of_lt {n m : ℕ} : n < m -> pred n < m :=
 lt_of_le_of_lt !pred_le
 
-theorem lt_of_pred_lt_pred {n m : ℕ} (H : pred n < pred m) : n < m :=
+Definition lt_of_pred_lt_pred {n m : ℕ} (H : pred n < pred m) : n < m :=
 lt_of_not_ge
   (suppose m ≤ n,
     not_lt_of_ge (pred_le_pred_of_le this) H)
 
-theorem le_sum_eq_succ_of_le_succ {n m : ℕ} (H : n ≤ succ m) : n ≤ m ⊎ n = succ m :=
+Definition le_sum_eq_succ_of_le_succ {n m : ℕ} (H : n ≤ succ m) : n ≤ m ⊎ n = succ m :=
 sum.imp_left le_of_succ_le_succ (succ_le_sum_eq_of_le H)
 
-theorem le_pred_self (n : ℕ) : pred n ≤ n :=
+Definition le_pred_self (n : ℕ) : pred n ≤ n :=
 !pred_le
 
-theorem succ_pos (n : ℕ) : 0 < succ n :=
+Definition succ_pos (n : ℕ) : 0 < succ n :=
 !zero_lt_succ
 
-theorem succ_pred_of_pos {n : ℕ} (H : n > 0) : succ (pred n) = n :=
-(sum_resolve_right (eq_zero_sum_eq_succ_pred n) (ne.symm (ne_of_lt H)))⁻¹
+Definition succ_pred_of_pos {n : ℕ} (H : n > 0) : succ (pred n) = n :=
+(sum_resolve_right (eq_zero_sum_eq_succ_pred n) (ne.symm (ne_of_lt H)))^-1
 
-theorem exists_eq_succ_of_lt {n : ℕ} : Π {m : ℕ}, n < m → Σk, m = succ k
+Definition exists_eq_succ_of_lt {n : ℕ} : forall {m : ℕ}, n < m -> Σk, m = succ k
 | 0        H := absurd H !not_lt_zero
 | (succ k) H := sigma.mk k rfl
 
-theorem lt_succ_self (n : ℕ) : n < succ n :=
+Definition lt_succ_self (n : ℕ) : n < succ n :=
 lt.base n
 
-lemma lt_succ_of_lt {i j : nat} : i < j → i < succ j :=
+lemma lt_succ_of_lt {i j : nat} : i < j -> i < succ j :=
 assume Plt, lt.trans Plt (self_lt_succ j)
 
 lemma one_le_succ (n : ℕ) : 1 ≤ succ n :=
@@ -234,85 +234,85 @@ nat.succ_le_succ !zero_le
 lemma two_le_succ_succ (n : ℕ) : 2 ≤ succ (succ n) :=
 nat.succ_le_succ !one_le_succ
 
-/- other forms of induction -/
+(* other forms of induction *)
 
-protected definition strong_rec_on {P : nat → Type} (n : ℕ) (H : Πn, (Πm, m < n → P m) → P n) : P n :=
-nat.rec (λm h, absurd h !not_lt_zero)
-  (λn' (IH : Π {m : ℕ}, m < n' → P m) m l,
+protectedDefinition strong_rec_on {P : nat -> Type} (n : ℕ) (H : forall n, (forall m, m < n -> P m) -> P n) : P n :=
+nat.rec (fun m h => absurd h !not_lt_zero)
+  (fun n' (IH : forall , m < n' -> P m) m l,
      sum.elim (lt_sum_eq_of_le (le_of_lt_succ l))
-    IH (λ e, eq.rec (H n' @IH) e⁻¹)) (succ n) n !lt_succ_self
+    IH (fun e => eq.rec (H n' @IH) e^-1)) (succ n) n !lt_succ_self
 
-protected theorem case_strong_rec_on {P : nat → Type} (a : nat) (H0 : P 0)
-  (Hind : Π(n : nat), (Πm, m ≤ n → P m) → P (succ n)) : P a :=
+protectedDefinition case_strong_rec_on {P : nat -> Type} (a : nat) (H0 : P 0)
+  (Hind : forall (n : nat), (forall m, m ≤ n -> P m) -> P (succ n)) : P a :=
 nat.strong_rec_on a
   (take n,
-   show (Π m, m < n → P m) → P n, from
+   show (forall m, m < n -> P m) -> P n, from
      nat.cases_on n
-       (suppose (Π m, m < 0 → P m), show P 0, from H0)
+       (suppose (forall m, m < 0 -> P m), show P 0, from H0)
        (take n,
-         suppose (Π m, m < succ n → P m),
+         suppose (forall m, m < succ n -> P m),
          show P (succ n), from
            Hind n (take m, assume H1 : m ≤ n, this _ (lt_succ_of_le H1))))
 
-/- pos -/
+(* pos *)
 
-theorem by_cases_zero_pos {P : ℕ → Type} (y : ℕ) (H0 : P 0) (H1 : Π {y : nat}, y > 0 → P y) :
+Definition by_cases_zero_pos {P : ℕ -> Type} (y : ℕ) (H0 : P 0) (H1 : forall {y : nat}, y > 0 -> P y) :
   P y :=
 nat.cases_on y H0 (take y, H1 !succ_pos)
 
-theorem eq_zero_sum_pos (n : ℕ) : n = 0 ⊎ n > 0 :=
+Definition eq_zero_sum_pos (n : ℕ) : n = 0 ⊎ n > 0 :=
 sum_of_sum_of_imp_left
   (sum.swap (lt_sum_eq_of_le !zero_le))
   (suppose 0 = n, by subst n)
 
-theorem pos_of_ne_zero {n : ℕ} (H : n ≠ 0) : n > 0 :=
+Definition pos_of_ne_zero {n : ℕ} (H : n ≠ 0) : n > 0 :=
 sum.elim !eq_zero_sum_pos (take H2 : n = 0, by contradiction) (take H2 : n > 0, H2)
 
-theorem ne_zero_of_pos {n : ℕ} (H : n > 0) : n ≠ 0 :=
+Definition ne_zero_of_pos {n : ℕ} (H : n > 0) : n ≠ 0 :=
 ne.symm (ne_of_lt H)
 
-theorem exists_eq_succ_of_pos {n : ℕ} (H : n > 0) : Σl, n = succ l :=
+Definition exists_eq_succ_of_pos {n : ℕ} (H : n > 0) : Σl, n = succ l :=
 exists_eq_succ_of_lt H
 
-theorem pos_of_dvd_of_pos {m n : ℕ} (H1 : m ∣ n) (H2 : n > 0) : m > 0 :=
+Definition pos_of_dvd_of_pos {m n : ℕ} (H1 : m ∣ n) (H2 : n > 0) : m > 0 :=
 pos_of_ne_zero
   (suppose m = 0,
-   have  n = 0, from eq_zero_of_zero_dvd (this ▸ H1),
+   have  n = 0, from eq_zero_of_zero_dvd (this # H1),
    ne_of_lt H2 (by subst n))
 
-/- multiplication -/
+(* multiplication *)
 
-theorem mul_lt_mul_of_le_of_lt {n m k l : ℕ} (Hk : k > 0) (H1 : n ≤ k) (H2 : m < l) :
+Definition mul_lt_mul_of_le_of_lt {n m k l : ℕ} (Hk : k > 0) (H1 : n ≤ k) (H2 : m < l) :
   n * m < k * l :=
 lt_of_le_of_lt (mul_le_mul_right m H1) (mul_lt_mul_of_pos_left H2 Hk)
 
-theorem mul_lt_mul_of_lt_of_le {n m k l : ℕ} (Hl : l > 0) (H1 : n < k) (H2 : m ≤ l) :
+Definition mul_lt_mul_of_lt_of_le {n m k l : ℕ} (Hl : l > 0) (H1 : n < k) (H2 : m ≤ l) :
   n * m < k * l :=
 lt_of_le_of_lt (mul_le_mul_left n H2) (mul_lt_mul_of_pos_right H1 Hl)
 
-theorem mul_lt_mul_of_le_of_le {n m k l : ℕ} (H1 : n < k) (H2 : m < l) : n * m < k * l :=
+Definition mul_lt_mul_of_le_of_le {n m k l : ℕ} (H1 : n < k) (H2 : m < l) : n * m < k * l :=
 have H3 : n * m ≤ k * m, from mul_le_mul_right m (le_of_lt H1),
 have H4 : k * m < k * l, from mul_lt_mul_of_pos_left H2 (lt_of_le_of_lt !zero_le H1),
 lt_of_le_of_lt H3 H4
 
-theorem eq_of_mul_eq_mul_left {m k n : ℕ} (Hn : n > 0) (H : n * m = n * k) : m = k :=
+Definition eq_of_mul_eq_mul_left {m k n : ℕ} (Hn : n > 0) (H : n * m = n * k) : m = k :=
 have n * m ≤ n * k, by rewrite H,
 have m ≤ k,         from le_of_mul_le_mul_left this Hn,
 have n * k ≤ n * m, by rewrite H,
 have k ≤ m,         from le_of_mul_le_mul_left this Hn,
 le.antisymm `m ≤ k` this
 
-theorem eq_of_mul_eq_mul_right {n m k : ℕ} (Hm : m > 0) (H : n * m = k * m) : n = k :=
-eq_of_mul_eq_mul_left Hm (!mul.comm ▸ !mul.comm ▸ H)
+Definition eq_of_mul_eq_mul_right {n m k : ℕ} (Hm : m > 0) (H : n * m = k * m) : n = k :=
+eq_of_mul_eq_mul_left Hm (!mul.comm # !mul.comm # H)
 
-theorem eq_zero_sum_eq_of_mul_eq_mul_left {n m k : ℕ} (H : n * m = n * k) : n = 0 ⊎ m = k :=
+Definition eq_zero_sum_eq_of_mul_eq_mul_left {n m k : ℕ} (H : n * m = n * k) : n = 0 ⊎ m = k :=
 sum_of_sum_of_imp_right !eq_zero_sum_pos
   (assume Hn : n > 0, eq_of_mul_eq_mul_left Hn H)
 
-theorem eq_zero_sum_eq_of_mul_eq_mul_right  {n m k : ℕ} (H : n * m = k * m) : m = 0 ⊎ n = k :=
-eq_zero_sum_eq_of_mul_eq_mul_left (!mul.comm ▸ !mul.comm ▸ H)
+Definition eq_zero_sum_eq_of_mul_eq_mul_right  {n m k : ℕ} (H : n * m = k * m) : m = 0 ⊎ n = k :=
+eq_zero_sum_eq_of_mul_eq_mul_left (!mul.comm # !mul.comm # H)
 
-theorem eq_one_of_mul_eq_one_right {n m : ℕ} (H : n * m = 1) : n = 1 :=
+Definition eq_one_of_mul_eq_one_right {n m : ℕ} (H : n * m = 1) : n = 1 :=
 have H2 : n * m > 0, by rewrite H; apply succ_pos,
 sum.elim (le_sum_gt n 1)
   (suppose n ≤ 1,
@@ -321,52 +321,52 @@ sum.elim (le_sum_gt n 1)
   (suppose n > 1,
     have m > 0, from pos_of_mul_pos_left H2,
     have n * m ≥ 2 * 1, from nat.mul_le_mul (succ_le_of_lt `n > 1`) (succ_le_of_lt this),
-    have 1 ≥ 2, from !mul_one ▸ H ▸ this,
+    have 1 ≥ 2, from !mul_one # H # this,
     absurd !lt_succ_self (not_lt_of_ge this))
 
-theorem eq_one_of_mul_eq_one_left {n m : ℕ} (H : n * m = 1) : m = 1 :=
-eq_one_of_mul_eq_one_right (!mul.comm ▸ H)
+Definition eq_one_of_mul_eq_one_left {n m : ℕ} (H : n * m = 1) : m = 1 :=
+eq_one_of_mul_eq_one_right (!mul.comm # H)
 
-theorem eq_one_of_mul_eq_self_left {n m : ℕ} (Hpos : n > 0) (H : m * n = n) : m = 1 :=
-eq_of_mul_eq_mul_right Hpos (H ⬝ !one_mul⁻¹)
+Definition eq_one_of_mul_eq_self_left {n m : ℕ} (Hpos : n > 0) (H : m * n = n) : m = 1 :=
+eq_of_mul_eq_mul_right Hpos (H @ !one_mul^-1)
 
-theorem eq_one_of_mul_eq_self_right {n m : ℕ} (Hpos : m > 0) (H : m * n = m) : n = 1 :=
-eq_one_of_mul_eq_self_left Hpos (!mul.comm ▸ H)
+Definition eq_one_of_mul_eq_self_right {n m : ℕ} (Hpos : m > 0) (H : m * n = m) : n = 1 :=
+eq_one_of_mul_eq_self_left Hpos (!mul.comm # H)
 
-theorem eq_one_of_dvd_one {n : ℕ} (H : n ∣ 1) : n = 1 :=
+Definition eq_one_of_dvd_one {n : ℕ} (H : n ∣ 1) : n = 1 :=
 dvd.elim H
   (take m, suppose 1 = n * m,
-   eq_one_of_mul_eq_one_right this⁻¹)
+   eq_one_of_mul_eq_one_right this^-1)
 
-/- min and max -/
+(* min and max *)
 open decidable
 
-theorem min_zero [simp] (a : ℕ) : min a 0 = 0 :=
+Definition min_zero [simp] (a : ℕ) : min a 0 = 0 :=
 by rewrite [min_eq_right !zero_le]
 
-theorem zero_min [simp] (a : ℕ) : min 0 a = 0 :=
+Definition zero_min [simp] (a : ℕ) : min 0 a = 0 :=
 by rewrite [min_eq_left !zero_le]
 
-theorem max_zero [simp] (a : ℕ) : max a 0 = a :=
+Definition max_zero [simp] (a : ℕ) : max a 0 = a :=
 by rewrite [max_eq_left !zero_le]
 
-theorem zero_max [simp] (a : ℕ) : max 0 a = a :=
+Definition zero_max [simp] (a : ℕ) : max 0 a = a :=
 by rewrite [max_eq_right !zero_le]
 
-theorem min_succ_succ [simp] (a b : ℕ) : min (succ a) (succ b) = succ (min a b) :=
+Definition min_succ_succ [simp] (a b : ℕ) : min (succ a) (succ b) = succ (min a b) :=
 sum.elim !lt_sum_ge
   (suppose a < b, by rewrite [min_eq_left_of_lt this, min_eq_left_of_lt (succ_lt_succ this)])
   (suppose a ≥ b, by rewrite [min_eq_right this, min_eq_right (succ_le_succ this)])
 
-theorem max_succ_succ [simp] (a b : ℕ) : max (succ a) (succ b) = succ (max a b) :=
+Definition max_succ_succ [simp] (a b : ℕ) : max (succ a) (succ b) = succ (max a b) :=
 sum.elim !lt_sum_ge
   (suppose a < b, by rewrite [max_eq_right_of_lt this, max_eq_right_of_lt (succ_lt_succ this)])
   (suppose a ≥ b, by rewrite [max_eq_left this, max_eq_left (succ_le_succ this)])
 
-/- In algebra.ordered_group, these next four are only proved for additive groups, not additive
-   semigroups. -/
+(* In algebra.ordered_group, these next four are only proved for additive groups, not additive
+   semigroups. *)
 
-protected theorem min_add_add_left (a b c : ℕ) : min (a + b) (a + c) = a + min b c :=
+protectedDefinition min_add_add_left (a b c : ℕ) : min (a + b) (a + c) = a + min b c :=
 decidable.by_cases
   (suppose b ≤ c,
    have a + b ≤ a + c, from add_le_add_left this _,
@@ -376,10 +376,10 @@ decidable.by_cases
    have a + c ≤ a + b, from add_le_add_left this _,
    by rewrite [min_eq_right `c ≤ b`, min_eq_right this])
 
-protected theorem min_add_add_right (a b c : ℕ) : min (a + c) (b + c) = min a b + c :=
+protectedDefinition min_add_add_right (a b c : ℕ) : min (a + c) (b + c) = min a b + c :=
 by rewrite [add.comm a c, add.comm b c, add.comm _ c]; apply nat.min_add_add_left
 
-protected theorem max_add_add_left (a b c : ℕ) : max (a + b) (a + c) = a + max b c :=
+protectedDefinition max_add_add_left (a b c : ℕ) : max (a + b) (a + c) = a + max b c :=
 decidable.by_cases
   (suppose b ≤ c,
    have a + b ≤ a + c, from add_le_add_left this _,
@@ -389,22 +389,22 @@ decidable.by_cases
    have a + c ≤ a + b, from add_le_add_left this _,
    by rewrite [max_eq_left `c ≤ b`, max_eq_left this])
 
-protected theorem max_add_add_right (a b c : ℕ) : max (a + c) (b + c) = max a b + c :=
+protectedDefinition max_add_add_right (a b c : ℕ) : max (a + c) (b + c) = max a b + c :=
 by rewrite [add.comm a c, add.comm b c, add.comm _ c]; apply nat.max_add_add_left
 
-/- least and greatest -/
+(* least and greatest *)
 
 section least_prod_greatest
-  variable (P : ℕ → Type)
-  variable [decP : Π n, decidable (P n)]
+  variable (P : ℕ -> Type)
+  variable [decP : forall n, decidable (P n)]
   include decP
 
-  -- returns the least i < n satisfying P, sum n if there is none
-  definition least : ℕ → ℕ
+  (* returns the least i < n satisfying P, sum n if there is none *)
+Definition least : ℕ -> ℕ
     | 0        := 0
     | (succ n) := if P (least n) then least n else succ n
 
-  theorem least_of_bound {n : ℕ} (H : P n) : P (least P n) :=
+Definition least_of_bound {n : ℕ} (H : P n) : P (least P n) :=
     begin
       induction n with [m, ih],
       rewrite ↑least,
@@ -417,7 +417,7 @@ section least_prod_greatest
       apply H
     end
 
-  theorem least_le (n : ℕ) : least P n ≤ n:=
+Definition least_le (n : ℕ) : least P n ≤ n:=
     begin
       induction n with [m, ih],
         {rewrite ↑least},
@@ -428,7 +428,7 @@ section least_prod_greatest
       rewrite [if_neg Pnsm]
     end
 
- theorem least_of_lt {i n : ℕ} (ltin : i < n) (H : P i) : P (least P n) :=
+Definition least_of_lt {i n : ℕ} (ltin : i < n) (H : P i) : P (least P n) :=
    begin
      induction n with [m, ih],
      exact absurd ltin !not_lt_zero,
@@ -443,7 +443,7 @@ section least_prod_greatest
      exact absurd (least_of_bound P H) Pnsm
    end
 
-  theorem ge_least_of_lt {i n : ℕ} (ltin : i < n) (Hi : P i) : i ≥ least P n :=
+Definition ge_least_of_lt {i n : ℕ} (ltin : i < n) (Hi : P i) : i ≥ least P n :=
     begin
       induction n with [m, ih],
       exact absurd ltin !not_lt_zero,
@@ -461,38 +461,38 @@ section least_prod_greatest
       apply absurd (least_of_bound P Hi) Pnsm
     end
 
-  theorem least_lt {n i : ℕ} (ltin : i < n) (Hi : P i) : least P n < n :=
+Definition least_lt {n i : ℕ} (ltin : i < n) (Hi : P i) : least P n < n :=
     lt_of_le_of_lt (ge_least_of_lt P ltin Hi) ltin
 
-  -- returns the largest i < n satisfying P, sum n if there is none.
-  definition greatest : ℕ → ℕ
+  (* returns the largest i < n satisfying P, sum n if there is none. *)
+Definition greatest : ℕ -> ℕ
   | 0        := 0
   | (succ n) := if P n then n else greatest n
 
-  theorem greatest_of_lt {i n : ℕ} (ltin : i < n) (Hi : P i) : P (greatest P n) :=
-  begin
+Definition greatest_of_lt {i n : ℕ} (ltin : i < n) (Hi : P i) : P (greatest P n) :=
+Proof.
     induction n with [m, ih],
       {exact absurd ltin !not_lt_zero},
       {cases (decidable.em (P m)) with [Psm, Pnsm],
         {rewrite [↑greatest, if_pos Psm]; exact Psm},
         {rewrite [↑greatest, if_neg Pnsm],
-          have neim : i ≠ m, from assume H : i = m, absurd (H ▸ Hi) Pnsm,
+          have neim : i ≠ m, from assume H : i = m, absurd (H # Hi) Pnsm,
           have ltim : i < m, from lt_of_le_of_ne (le_of_lt_succ ltin) neim,
           apply ih ltim}}
-  end
+Defined.
 
-  theorem le_greatest_of_lt {i n : ℕ} (ltin : i < n) (Hi : P i) : i ≤ greatest P n :=
-  begin
+Definition le_greatest_of_lt {i n : ℕ} (ltin : i < n) (Hi : P i) : i ≤ greatest P n :=
+Proof.
     induction n with [m, ih],
       {exact absurd ltin !not_lt_zero},
       {cases (decidable.em (P m)) with [Psm, Pnsm],
         {rewrite [↑greatest, if_pos Psm], apply le_of_lt_succ ltin},
         {rewrite [↑greatest, if_neg Pnsm],
-          have neim : i ≠ m, from assume H : i = m, absurd (H ▸ Hi) Pnsm,
+          have neim : i ≠ m, from assume H : i = m, absurd (H # Hi) Pnsm,
           have ltim : i < m, from lt_of_le_of_ne (le_of_lt_succ ltin) neim,
           apply ih ltim}}
-  end
+Defined.
 
-end least_prod_greatest
+Defined. least_prod_greatest
 
-end nat
+Defined. nat
